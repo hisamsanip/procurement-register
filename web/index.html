@@ -892,7 +892,7 @@ const F=[
  {k:'reqby',s:1,g:'Requester',l:'Requested by',t:'text',r:1},
  {k:'reqdes',s:1,l:'Requester designation',t:'text'},
  {k:'location',s:1,l:'Location of service / delivery',t:'text',r:1,h:'Block, level or area.'},
- {k:'justif',s:1,l:'Justification (reason to purchase)',t:'area',big:1,r:1,w:2,h:'Printed in PRF item 2.4 and in the QA under Reason to purchase. Write as much as is needed, up to 1,000 characters. Line breaks are kept.'},
+ {k:'justif',s:1,l:'Justification (reason to purchase)',t:'area',big:1,r:1,w:2,h:'Printed in the PRF under 2.5 Reason to purchase and in the QA under Reason to purchase. Write as much as is needed, up to 1,000 characters. Line breaks are kept.'},
  {k:'urgency',s:1,l:'Urgency',t:'sel',o:['Normal','Urgent'],r:1},
  {k:'insur',s:1,l:'Insurance claim involved?',t:'sel',o:YN,r:1},
  {k:'meeting',s:1,l:'Meeting instruction ref.',t:'text',h:'Leave blank if none.'},
@@ -1521,21 +1521,24 @@ function formPRF(r,c,X){
     [{chk:r.cat==='Service'},{t:'Service'},{t:'Project'},{t:X.prop.name||r.prop},{t:'Date requested'},{t:dd(r.prfdate)}],
     [{chk:r.cat==='Purchase'},{t:'Purchase'},{t:'For'},{t:r.desc},{t:'Requested by'},{t:r.reqby}],
     [{chk:r.cat==='Service & Purchase'},{t:'Service & Purchase'},{t:'Location'},{t:r.location},{t:'Designation'},{t:r.reqdes}]],{minH:5.6})+4;
-  y+=slate(x,y,w,'2. JUSTIFICATION',5.5);const y22=y;
+  y+=slate(x,y,w,'2. JUSTIFICATION',5.5);
   y+=ROWS(x,y,[52,8,30,8,76],[
     [{t:'2.1 Instruction as per meeting on'},{t:r.meeting,span:4}],
     [{t:'2.2 Urgency'},{chk:r.urgency==='Urgent'},{t:'Urgent'},{chk:r.urgency==='Normal'},{t:'Normal'}],
     [{t:'2.3 Insurance claim'},{chk:r.insur==='Yes'},{t:'Yes'},{chk:r.insur==='No'},{t:'No'}],
-    [{t:'2.4 Others (Please specify):'},{t:r.justif,span:4}]],{minH:5.6})+4;
-  const extra=Math.max(0,(y-y22)-26);
-  const qv=[num(r.q1),num(r.q2),num(r.q3)], vs=[r.v1,r.v2,r.v3];
+    [{t:'2.4 Others (Please specify):'},{t:'',span:4}]],{minH:5.6});
+  y+=ROW(x,y,[w],[{t:'2.5 Reason to purchase',fill:LB}],{minH:5});
+  y+=ROW(x,y,[w],[{t:r.justif||''}],{minH:14,pad:2})+4;
+  const vs=[r.v1,r.v2,r.v3], vw=[58,40,30,46];
   y+=slate(x,y,w,'3. VENDOR TO INVITE',6);
-  vs.forEach((v,i)=>{y+=ROW(x,y,[w],[{t:(i+1)+'. '+(v||'')}],{minH:6.5})});
+  y+=ROW(x,y,vw,['VENDOR','PERSON IN CHARGE','CONTACT NUMBER','EMAIL'].map(t=>({t,b:true,al:'c',fill:GR,sz:7.5})),{minH:5.6});
+  vs.forEach((v,i)=>{const d=vendors.find(z=>z.name===v)||{};y+=ROW(x,y,vw,[{t:(i+1)+'. '+(v||'')},{t:d.contact||''},{t:d.tel||''},{t:d.email||'',sz:7.5}],{minH:6.5})});
   y+=4;
+  if(y>185){D.addPage(); letter(x,w); bar(x,44,w,9,'PROCUREMENT REQUISITION FORM','PRF No: '+r.prfno); y=56}
   y+=slate(x,y,w,'4. DESCRIPTION OF PROCUREMENT',6);
-  y+=ROW(x,y,[84,24,34,32],['DESCRIPTION OF ITEMS','QTY','Unit Price','Total Amount'].map(t=>({t,b:true,i:true,al:'c',fill:GR,vm:true})),{minH:9.5});
+  y+=ROW(x,y,[84,24,34,32],['DESCRIPTION OF ITEMS','QTY','Estimated Unit Price','Estimated Total Amount'].map(t=>({t,b:true,i:true,al:'c',fill:GR,vm:true})),{minH:9.5});
   const desc=pdx(r,[{t:r.desc,b:true,gap:1},{t:'Scope of Work:',b:true,gap:3,svc:1},{t:r.scope,svc:1},{t:'Work area: '+(r.area||'')},{t:'Job Scope:',b:true,gap:3,svc:1},{t:r.job,svc:1},{t:'Service Frequency: '+(r.freq||''),gap:3,svc:1},{t:'Contract Period: '+period(r),b:false,gap:3},{t:'SST: '+pct(r),gap:3}],false);
-  y+=ROW(x,y,[84,24,34,32],[{t:desc},{t:String(X.qty),al:'c',vm:false},{t:'RM'+money(X.unit),al:'c'},{t:'RM'+money(X.total),al:'c'}],{minH:Math.max(26,70-extra),pad:2});
+  y+=ROW(x,y,[84,24,34,32],[{t:desc},{t:String(X.qty),al:'c',vm:false},{t:'RM'+money(X.unit),al:'c'},{t:'RM'+money(X.total),al:'c'}],{minH:Math.max(26,Math.min(70,262-y)),pad:2});
   y+=ROW(x,y,[84,24,34,32],[{t:'TOTAL',b:true,al:'r',span:2,fill:LB,vm:true},{t:'',fill:LB},{t:'RM'+money(X.total),b:true,al:'c',fill:LB,vm:true}],{minH:9});
   // page 2
   D.addPage(); letter(x,w); bar(x,44,w,9,'PROCUREMENT REQUISITION FORM','PRF No: '+r.prfno);
@@ -1559,10 +1562,11 @@ function formPRF(r,c,X){
     {t:'Signed on/and on behalf of '+(X.prop.name||r.prop),gap:4}];
   const hh=ROW(x,y,[L,R],[{t:ap},{t:[{parts:[{box:false},{t:'  Approval Condition (If any)'}]},{parts:[{box:false},{t:'  Reason of disapproved'}],gap:3}]}],{minH:42,pad:2});
   y+=hh;
-  const blocks=[['Prepared by',X.be.n||r.reqby,X.be.d,r.prfdate],['Recommend by',X.ops.n,X.ops.d,''],['Approved by',X.ceo.n,X.ceo.d,r.prfappr]];
+  const blocks=[['Prepared by',X.be.n||r.reqby,X.be.d,r.prfdate],['Recommended by',X.ops.n,X.ops.d,''],['Approved by',X.ceo.n,X.ceo.d,r.prfappr]];
   let sy=y;
   blocks.forEach(b=>{
     sy+=ROW(x,sy,[L],[{t:b[0],b:true,al:'c',fill:GR}],{minH:5.4});
+    sy+=ROW(x,sy,[22,L-22],[{t:'Signature',fill:GR,vm:true},{t:''}],{minH:13});
     sy+=ROW(x,sy,[22,L-22],[{t:'Name',fill:GR},{t:b[1],b:true}],{minH:5.4});
     sy+=ROW(x,sy,[22,L-22],[{t:'Designation',fill:GR},{t:b[2]}],{minH:5.4+(b[2].length>45?4:0)});
     sy+=ROW(x,sy,[22,L-22],[{t:'Date',fill:GR},{t:dd(b[3])}],{minH:5.4});
