@@ -17,6 +17,10 @@ Invite yourself (Authentication > Users > Invite user), accept the email, then r
 After that, manage roles and property access in the app's **Users** page.
 
 ## Roles
-- admin: everything, all properties
-- manager: create and edit records for assigned properties
-- viewer: read-only for assigned properties
+- Administrator: everything, all projects
+- Property Manager: raises and edits records for assigned properties only; can add vendors with an SSM document
+- Management: views all projects and the dashboard, no editing
+- Vendor management: maintains the vendor list, blacklists vendors; records are view only
+- Viewer: read-only for assigned properties
+
+Database changes after the first setup are in `migrations/`. Run each once in the Supabase SQL editor.
