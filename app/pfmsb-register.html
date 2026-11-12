@@ -1014,7 +1014,6 @@ async function saveRec(){
 async function createRec(prop,date){
   const id='rec_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
   const r={id,prop,prfdate:date,prfno:nextNo('PRF',prop,date),qty:1,urgency:'Normal',insur:'No',emerg:'No',cancel:'No',createdAt:Date.now(),createdBy:uid};
-  if(UNAME)r.reqby=UNAME;
   F.forEach(f=>{if(f.k&&!(f.k in r))r[f.k]=''});
   r.rfqno='';r.qano='';r.pono='';
   try{await w('records/'+id,r);recs.push(r);newOpen=false;openRec(id,true);flash('Created '+r.prfno)}
@@ -1547,14 +1546,13 @@ function formPRF(r,c,X){
   y+=hh;
   const blocks=[['Prepared by',X.be.n||r.reqby,X.be.d,r.prfdate],['Recommended by',X.ops.n,X.ops.d,''],['Approved by',X.ceo.n,X.ceo.d,r.prfappr]];
   let sy=y;
-  blocks.forEach(b=>{
+  blocks.forEach(b=>{const y0=sy;
     sy+=ROW(x,sy,[L],[{t:b[0],b:true,al:'c',fill:GR}],{minH:5.4});
-    sy+=ROW(x,sy,[22,L-22],[{t:'Signature',fill:GR,vm:true},{t:''}],{minH:13});
     sy+=ROW(x,sy,[22,L-22],[{t:'Name',fill:GR},{t:b[1],b:true}],{minH:5.4});
     sy+=ROW(x,sy,[22,L-22],[{t:'Designation',fill:GR},{t:b[2]}],{minH:5.4+(b[2].length>45?4:0)});
     sy+=ROW(x,sy,[22,L-22],[{t:'Date',fill:GR},{t:dd(b[3])}],{minH:5.4});
+    outline(x+L,y0,R,sy-y0);D.setFont('helvetica','normal');D.setFontSize(7);D.setTextColor(110,110,110);D.text('Signature',x+L+2,y0+4);D.setTextColor(0,0,0);
   });
-  outline(x+L,y,R,sy-y);
 }
 
 /* ---------- RFQ (one copy, three pages, sent to every invited vendor) ---------- */

@@ -1031,7 +1031,6 @@ async function saveRec(){
 async function createRec(prop,date){
   const id='rec_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
   const r={id,prop,prfdate:date,prfno:nextNo('PRF',prop,date),qty:1,urgency:'Normal',insur:'No',emerg:'No',cancel:'No',createdAt:Date.now(),createdBy:uid};
-  if(UNAME)r.reqby=UNAME;
   F.forEach(f=>{if(f.k&&!(f.k in r))r[f.k]=''});
   r.rfqno='';r.qano='';r.pono='';
   try{await w('records/'+id,r);recs.push(r);newOpen=false;openRec(id,true);flash('Created '+r.prfno)}
@@ -1564,14 +1563,13 @@ function formPRF(r,c,X){
   y+=hh;
   const blocks=[['Prepared by',X.be.n||r.reqby,X.be.d,r.prfdate],['Recommended by',X.ops.n,X.ops.d,''],['Approved by',X.ceo.n,X.ceo.d,r.prfappr]];
   let sy=y;
-  blocks.forEach(b=>{
+  blocks.forEach(b=>{const y0=sy;
     sy+=ROW(x,sy,[L],[{t:b[0],b:true,al:'c',fill:GR}],{minH:5.4});
-    sy+=ROW(x,sy,[22,L-22],[{t:'Signature',fill:GR,vm:true},{t:''}],{minH:13});
     sy+=ROW(x,sy,[22,L-22],[{t:'Name',fill:GR},{t:b[1],b:true}],{minH:5.4});
     sy+=ROW(x,sy,[22,L-22],[{t:'Designation',fill:GR},{t:b[2]}],{minH:5.4+(b[2].length>45?4:0)});
     sy+=ROW(x,sy,[22,L-22],[{t:'Date',fill:GR},{t:dd(b[3])}],{minH:5.4});
+    outline(x+L,y0,R,sy-y0);D.setFont('helvetica','normal');D.setFontSize(7);D.setTextColor(110,110,110);D.text('Signature',x+L+2,y0+4);D.setTextColor(0,0,0);
   });
-  outline(x+L,y,R,sy-y);
 }
 
 /* ---------- RFQ (one copy, three pages, sent to every invited vendor) ---------- */
@@ -1832,7 +1830,7 @@ async function renderUsers(){
   const [pr,up]=await Promise.all([sb.from('profiles').select('*').order('email'),sb.from('user_properties').select('*')]);
   if(pr.error){X.innerHTML='<h2 class="v">Users</h2><div class="note">Could not load users.</div>';return}
   const map={}; (up.data||[]).forEach(r=>(map[r.user_id]=map[r.user_id]||new Set()).add(r.property_code));
-  X.innerHTML=`<h2 class="v">Users</h2><div class="panel card"><p class="help" style="margin:0 0 10px">Invite people in the Supabase dashboard (Authentication, Users, Invite user). They appear here after they accept. The name is used as Requested by on a new PRF. Administrators, Management and the Vendor management team see every project. Property Managers and Viewers see only the properties ticked below.</p><p class="help" style="margin:0 0 10px">Administrator: everything. Property Manager: raises and edits records for their own properties, adds vendors. Management: views all records and the dashboard. Vendor management: maintains the vendor list and blacklists vendors. Viewer: view only.</p>
+  X.innerHTML=`<h2 class="v">Users</h2><div class="panel card"><p class="help" style="margin:0 0 10px">Invite people in the Supabase dashboard (Authentication, Users, Invite user). They appear here after they accept. Administrators, Management and the Vendor management team see every project. Property Managers and Viewers see only the properties ticked below.</p><p class="help" style="margin:0 0 10px">Administrator: everything. Property Manager: raises and edits records for their own properties, adds vendors. Management: views all records and the dashboard. Vendor management: maintains the vendor list and blacklists vendors. Viewer: view only.</p>
   <div class="tw"><table><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Active</th><th>Properties</th><th></th></tr></thead><tbody>${pr.data.map(u=>`<tr data-u="${E(u.id)}"><td>${E(u.email||'')}</td><td><input data-un value="${E(u.full_name||'')}" maxlength="80" aria-label="Name" style="min-width:150px"></td>
    <td><select data-ur aria-label="Role">${ROLES.map(([k,l])=>`<option value="${k}"${u.role===k?' selected':''}>${l}</option>`).join('')}</select></td>
    <td><input type="checkbox" data-ua${u.active?' checked':''} aria-label="Active" style="width:auto;min-height:0"></td>
