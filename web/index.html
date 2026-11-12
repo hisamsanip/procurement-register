@@ -185,9 +185,12 @@ td small{display:block;color:var(--ink-soft);font-size:11.5px}
 tr.sel td{background:var(--violet-tint)}
 body.noauth .app{display:none}
 .authwrap{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:linear-gradient(180deg,var(--sidebar-top),var(--sidebar-bottom));overflow:auto}
-.authcard{width:100%;max-width:380px;background:var(--surface-card);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:28px;display:grid;gap:10px}
+.authcard{width:100%;max-width:400px;background:var(--surface-card);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:28px;display:grid;gap:10px}
 .authcard h1{margin:0;font:700 22px/30px var(--font-heading)}
 .authcard form{display:grid;gap:12px;margin-top:6px}
+.authcard .plist{display:grid;gap:6px}
+.authcard .plist label{display:flex;gap:8px;align-items:center}
+.authcard .plist input{width:auto;min-height:0}
 .pf-nav__me{margin:auto 14px 10px;display:grid;gap:4px}
 .pf-nav__me #whoami{font-size:11.5px;color:rgba(255,255,255,.65);padding:0 14px;overflow-wrap:anywhere}
 .pf-nav__tip{margin-top:0}
@@ -826,7 +829,7 @@ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelect
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const STATES=['Johor','Kedah','Kelantan','Melaka','Negeri Sembilan','Pahang','Perak','Perlis','Pulau Pinang','Sabah','Sarawak','Selangor','Terengganu','WP Kuala Lumpur','WP Labuan','WP Putrajaya'];
 const TRADES=['Building and civil works','Cleaning','Electrical','Fire protection','Landscaping','Lift and escalator','Mechanical and air-conditioning','Pest control','Plumbing and sanitary','Security','Supplies and equipment','Waste management','Other'];
-const SJ=['Emergency','Sole proprietor','Exclusive services','Extension of previous contract'];
+const SJ=['Emergency','Original manufacturer or proprietary product','Exclusive services','Extension of previous contract'];
 let vf={q:'',state:'',trade:'',proj:'',val:'',cur:'',st:''}, vedit=null;
 const FS={max:5*1024*1024,maxT:'5 MB',
   put:async(id,file)=>{const ext=(file.name.split('.').pop()||'pdf').toLowerCase().replace(/[^a-z0-9]/g,'');const path=id+'/ssm-'+Date.now()+'.'+ext;const {error}=await sb.storage.from('vendor-docs').upload(path,file,{contentType:file.type});if(error)throw error;return path},
@@ -1789,6 +1792,7 @@ function handle(el){
 }
 document.addEventListener('keydown',ev=>{if((ev.ctrlKey||ev.metaKey)&&ev.key==='s'&&draft){ev.preventDefault();saveRec()}});
 
+/* ---- boot ---- */
 /* ---- users (admin) ---- */
 const ROLES=[['admin','Administrator'],['manager','Property Manager'],['management','Management'],['vendor','Vendor management'],['viewer','Viewer']];
 async function renderUsers(){
