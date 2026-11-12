@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body class="noauth">
-<title>PFMSB Procurement Register</title>
+<title>Strata Procurement Register</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -117,6 +117,10 @@ textarea{min-height:68px;resize:vertical}
 .calc span{display:block;font-size:11.5px;color:var(--ink-soft);font-weight:600}
 .calc output{display:block;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;font-size:13px}
 .pdfrow .btn.hd{background:var(--primary-tint);border-color:var(--primary-tint);color:var(--primary)}
+.libbox{grid-column:1/-1;background:var(--surface-subtle);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;display:grid;gap:8px}
+.libit{display:flex;gap:12px;align-items:center;justify-content:space-between;background:var(--surface-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:9px 12px}
+.libit div{min-width:0}.libit b{display:block}.libit small{display:block;color:var(--ink-soft);font-size:11.5px}.libit span{display:block;color:var(--ink-soft);font-size:12px;overflow-wrap:anywhere}
+.tacc{display:flex;flex-wrap:wrap;gap:6px}
 .pdfrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .skip{grid-column:1/-1;background:var(--primary-tint);color:var(--tint-ink);padding:10px 14px;border-radius:var(--radius-md)}
 .bar{position:sticky;bottom:0;background:var(--surface-card);border-top:1px solid var(--border);padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-radius:0 0 var(--radius-card) var(--radius-card)}
@@ -210,7 +214,7 @@ body.noauth .app{display:none}
 
 <div class="app">
 <nav class="pf-nav" aria-label="Views">
-  <div class="pf-nav__brand"><div class="pf-nav__logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z M10 6h4 M10 10h4 M10 14h4"/></svg></div><div class="pf-nav__name">PFMSB<small>Procurement Register</small></div></div>
+  <div class="pf-nav__brand"><div class="pf-nav__logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z M10 6h4 M10 10h4 M10 14h4"/></svg></div><div class="pf-nav__name">Strata Procurement Register<small>PFMSB</small></div></div>
   <div class="pf-nav__rule"></div>
   <div class="pf-nav__list">
     <button class="pf-nav__item" data-view="records" aria-current="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h.01 M3 12h.01 M3 19h.01 M8 5h13 M8 12h13 M8 19h13"/></svg><span>Records</span></button>
@@ -226,7 +230,7 @@ body.noauth .app{display:none}
   <div class="pf-nav__tip"><b>Order of work</b><span>PRF approval first, then RFQ, quotation analysis and the purchase order. No document is dated before its approval.</span></div>
 </nav>
 <main class="main">
-  <section class="pf-hero"><div><h1>Procurement register</h1><p>PRF, RFQ, Quotation Analysis and Purchase Order for every property under developer management. Key in once and each form is filled for signature. The Guidelines page holds the procedure.</p></div></section>
+  <section class="pf-hero"><div><h1>Strata Procurement Register</h1><p>PRF, RFQ, Quotation Analysis and Purchase Order for every property under developer management. Key in once and each form is filled for signature. The Guidelines page holds the procedure.</p></div></section>
   <div id="notice"></div>
   <section id="v-records" class="split">
     <aside id="list" class="panel" aria-label="Records"></aside>
@@ -808,9 +812,9 @@ body.noauth .app{display:none}
 </div>
 <div id="auth" class="authwrap" hidden><div class="authcard">
   <div class="pf-nav__logo" style="margin-bottom:14px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z M10 6h4 M10 10h4 M10 14h4"/></svg></div>
-  <h1 id="auth-h">Sign in</h1><p id="auth-p" class="help">PFMSB Procurement Register</p>
+  <h1 id="auth-h">Sign in</h1><p id="auth-p" class="help">Strata Procurement Register</p>
   <form id="authform" novalidate>
-    <div id="af-email"><label class="l" for="a-email">Email</label><input id="a-email" type="email" autocomplete="username" required></div>
+    <div id="af-email"><label class="l" for="a-email">Username (email)</label><input id="a-email" type="email" autocomplete="username" required></div>
     <div id="af-pw"><label class="l" for="a-pw">Password</label><input id="a-pw" type="password" autocomplete="current-password"></div>
     <div id="af-pw2" hidden><label class="l" for="a-pw2">Confirm password</label><input id="a-pw2" type="password" autocomplete="new-password"></div>
     <div id="a-msg" class="err" role="alert"></div>
@@ -830,6 +834,8 @@ const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>
 const STATES=['Johor','Kedah','Kelantan','Melaka','Negeri Sembilan','Pahang','Perak','Perlis','Pulau Pinang','Sabah','Sarawak','Selangor','Terengganu','WP Kuala Lumpur','WP Labuan','WP Putrajaya'];
 const TRADES=['Building and civil works','Cleaning','Electrical','Fire protection','Landscaping','Lift and escalator','Mechanical and air-conditioning','Pest control','Plumbing and sanitary','Security','Supplies and equipment','Waste management','Other'];
 const SJ=['Emergency','Original manufacturer or proprietary product','Exclusive services','Extension of previous contract'];
+let LIBR=null, UNAME='';
+const LIBK=['cat','desc','scope','pdesc','area','job','freq','qty','sst'];
 let vf={q:'',state:'',trade:'',proj:'',val:'',cur:'',st:''}, vedit=null;
 const FS={max:5*1024*1024,maxT:'5 MB',
   put:async(id,file)=>{const ext=(file.name.split('.').pop()||'pdf').toLowerCase().replace(/[^a-z0-9]/g,'');const path=id+'/ssm-'+Date.now()+'.'+ext;const {error}=await sb.storage.from('vendor-docs').upload(path,file,{contentType:file.type});if(error)throw error;return path},
@@ -838,15 +844,15 @@ const FS={max:5*1024*1024,maxT:'5 MB',
 const SB_URL='https://mzrwmvvikxewbahiuzij.supabase.co', SB_KEY='sb_publishable_GnvaPz6vkYUAtQ-cZBkziQ_zH-yPwNT';
 const HASH0=location.hash;
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const PK={records:'id',properties:'code',vendors:'id',settings:'id'};
+const PK={records:'id',properties:'code',vendors:'id',settings:'id',templates:'id'};
 const LS={};const poke=col=>(LS[col]||[]).forEach(f=>f());
 function mkdb(){return{
   doc:path=>{const [col,id]=path.split('/');return{
-    set:async data=>{const row={data};row[PK[col]]=id;const {error}=await sb.from(col).upsert(row,{onConflict:PK[col]});if(error)throw error;poke(col)},
+    set:async data=>{const row={data};row[PK[col]]=id;const {error}=await sb.from(col).upsert(row,{onConflict:PK[col]});if(error)throw error;poke(col);if(col==='records')poke('templates')},
     delete:async()=>{const {error}=await sb.from(col).delete().eq(PK[col],id);if(error)throw error;poke(col)}}},
   collection:col=>({onSnapshot(cb,err){
     let alive=true,tm=null;
-    const load=async()=>{const {data,error}=await sb.from(col).select('*');if(!alive)return;if(error){err&&err(error);return}cb({docs:data.map(r=>({id:r[PK[col]],data:()=>r.data}))})};
+    const load=async()=>{const {data,error}=await sb.from(col).select('*');if(!alive)return;if(error){err&&err(error);return}cb({docs:(data||[]).map(r=>({id:r[PK[col]],data:()=>r.data}))})};
     (LS[col]=LS[col]||[]).push(load); load();
     const ch=sb.channel('rt-'+col).on('postgres_changes',{event:'*',schema:'public',table:col},()=>{clearTimeout(tm);tm=setTimeout(load,250)}).subscribe();
     return()=>{alive=false;sb.removeChannel(ch)}}})}}
@@ -869,13 +875,16 @@ let tt;function flash(m){const t=$('#toast');t.textContent=m;t.hidden=false;clea
 
 /* ---- field definitions (same keys and rules as the Excel Entry sheet) ---- */
 const YN=['Yes','No'];
+const applies=(f,r)=>f.on==='svc'?r.cat!=='Purchase':f.on==='pur'?(r.cat==='Purchase'||r.cat==='Service & Purchase'):true;
+const pdx=(r,a,inl)=>{if(r.cat==='Purchase')a=a.filter(x=>!x.svc);if((r.cat==='Purchase'||r.cat==='Service & Purchase')&&r.pdesc)a.splice(1,0,...(inl?[{t:'Product Description: '+r.pdesc}]:[{t:'Product Description:',b:true,gap:3},{t:r.pdesc}]));return a};
 const F=[
- {k:'cat',s:1,g:'Item or service',l:'Category',t:'sel',o:['Service','Purchase','Service & Purchase'],r:1},
+ {k:'cat',s:1,g:'Item or service',l:'Category',t:'sel',o:['Service','Purchase','Service & Purchase'],r:1,h:'A purchase asks for the product description. A service asks for the scope of work and frequency.'},
  {k:'desc',s:1,l:'Description of item / service',t:'text',r:1,w:2,h:'Short title. Carried unchanged into the RFQ, QA and PO.'},
- {k:'scope',s:1,l:'Scope of work',t:'area',r:1,w:2,h:'What the vendor must do or supply.'},
+ {k:'pdesc',s:1,on:'pur',l:'Product description',t:'area',r:1,w:2,h:'Brand, model, specification, size and unit of the product to be supplied.'},
+ {k:'scope',s:1,on:'svc',l:'Scope of work',t:'area',r:1,w:2,h:'What the vendor must do.'},
  {k:'area',s:1,l:'Work area',t:'text',r:1,h:'Where in the property.'},
- {k:'job',s:1,l:'Job scope',t:'text',r:1,h:'Tasks included.'},
- {k:'freq',s:1,l:'Service frequency',t:'text',r:1,h:'For example Monthly, One-off.'},
+ {k:'job',s:1,on:'svc',l:'Job scope',t:'text',r:1,h:'Tasks included.'},
+ {k:'freq',s:1,on:'svc',l:'Service frequency',t:'text',r:1,h:'For example Monthly, One-off.'},
  {k:'cstart',s:1,l:'Contract / delivery start',t:'date',r:1},
  {k:'cend',s:1,l:'Contract / delivery end',t:'date',r:1,h:'On or after the start.'},
  {k:'qty',s:1,l:'Quantity',t:'qty',r:1,h:'1 for a lump-sum service.'},
@@ -970,7 +979,7 @@ function calc(r){
     const started=fs.some(f=>r[f.k]!==''&&r[f.k]!=null);
     if((n===2||n===3)&&skip){st[n]={c:'na',t:'Not required'};continue}
     if(!started){st[n]={c:'idle',t:'Not started'};continue}
-    const miss=fs.filter(f=>f.r&&(r[f.k]===''||r[f.k]==null)&&(f.r!=='v23'||full)).map(f=>f.l);
+    const miss=fs.filter(f=>f.r&&applies(f,r)&&(r[f.k]===''||r[f.k]==null)&&(f.r!=='v23'||full)).map(f=>f.l);
     if(n===3){if(!o.nq)miss.push('At least one quotation'); if(o.nq===1&&!r.sjust)miss.push('Justification for a single quotation'); if(reasonNeeded)miss.push('Reason (not lowest or fewer than '+S.minq+' quotes)')}
     st[n]=miss.length?{c:'miss',t:'Missing: '+miss.join('; ')}:{c:'done',t:'Complete'};
   }
@@ -1022,6 +1031,7 @@ async function saveRec(){
 async function createRec(prop,date){
   const id='rec_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
   const r={id,prop,prfdate:date,prfno:nextNo('PRF',prop,date),qty:1,urgency:'Normal',insur:'No',emerg:'No',cancel:'No',createdAt:Date.now(),createdBy:uid};
+  if(UNAME)r.reqby=UNAME;
   F.forEach(f=>{if(f.k&&!(f.k in r))r[f.k]=''});
   r.rfqno='';r.qano='';r.pono='';
   try{await w('records/'+id,r);recs.push(r);newOpen=false;openRec(id,true);flash('Created '+r.prfno)}
@@ -1086,6 +1096,7 @@ function renderEditor(){
       h+=f.c?`<div class="calc"><span>${E(f.l)}</span><output data-c="${f.c}">–</output></div>`:fieldHTML(f);
     });
     if(n<=4)h=`<div class="full pdfrow"><button class="btn hd" data-pdf="${n}">Generate ${['','PRF','RFQ','QA','PO'][n]} PDF for signature</button><span class="help" data-pdfhint="${n}"></span></div>`+h;
+    if(n===1&&canWrite)h=`<div class="libbox"><label class="l" for="libq">Copy from a similar past request</label><input type="search" id="libq" placeholder="Search past requests from all properties, for example lift maintenance" autocomplete="off"><div id="libres" style="display:grid;gap:6px"></div><div class="help">Fills the category, description, scope and related items so the wording is the same across projects. Amounts and vendors are never shown or copied.</div></div>`+h;
     if(n===2||n===3)h=`<div class="skip" data-skip="${n}" hidden>${n===2?'No RFQ':'No quotation analysis'} is needed for a direct purchase or an emergency. Go to Step 4 to raise the PO.</div>`+h;
     body+=`<div class="body" data-p="${n}" hidden>${h}</div>`;
   }
@@ -1099,6 +1110,21 @@ function renderEditor(){
   F.forEach(f=>{if(f.k&&$('#f-'+f.k)){const el=$('#f-'+f.k);if(f.t==='vendor'||f.t==='selv')return;el.value=draft[f.k]==null?'':String(draft[f.k]);if(f.big){const cn=$('[data-cnt="'+f.k+'"]');if(cn)cn.textContent=el.value.length+' / 1000 characters'}}});
   fillVendors(); showStep(step); update();
   if(!canWrite)$$('#editor input,#editor select,#editor textarea').forEach(x=>x.disabled=true);
+}
+function libSearch(q){
+  const box=$('#libres'); if(!box)return; const tk=q.toLowerCase().split(/\s+/).filter(x=>x.length>1);
+  if(!tk.length){box.innerHTML='';return}
+  const seen=new Set(), out=[];
+  (LIBR||recs).slice().sort((a,b)=>String(b.prfdate||'').localeCompare(String(a.prfdate||''))).forEach(r=>{
+    if(!r.desc||r.id===sel||out.length>=6)return;
+    const hay=[r.desc,r.scope,r.job,r.pdesc,r.cat].join(' ').toLowerCase(); if(!tk.every(x=>hay.includes(x)))return;
+    const key=(r.desc+'|'+(r.scope||'')+'|'+(r.pdesc||'')).toLowerCase(); if(seen.has(key))return; seen.add(key); out.push(r)});
+  box.innerHTML=out.length?out.map(r=>`<div class="libit"><div><b>${E(r.desc)}</b><small>${E([r.cat,r.prop,String(r.prfdate||'').slice(0,4)].filter(Boolean).join(' · '))}</small><span>${E(String(r.scope||r.pdesc||'').slice(0,160))}</span></div><button class="btn sm" data-lib="${E(r.id)}" type="button">Use</button></div>`).join(''):'<div class="help">No similar past request found.</div>';
+}
+function useLib(id){
+  const r=(LIBR||recs).find(x=>x.id===id); if(!r||!draft||!canWrite)return;
+  LIBK.forEach(k=>{if(r[k]!==undefined&&r[k]!==''&&r[k]!==null)draft[k]=r[k]});
+  renderEditor(); flash('Copied from '+(r.prop||'a past request')+'. Check and adjust before saving.');
 }
 function fillVendors(){
   ['v1','v2','v3'].forEach(k=>{
@@ -1132,6 +1158,7 @@ function update(){
   const mp=$('.pill[data-c="method"]'); if(mp)mp.className='pill info';
   const sp=$('.pill[data-c="stage"]'); if(sp)sp.className='pill '+(c.stage==='Cancelled'?'bad':c.stage==='Paid'?'ok':'warn');
   [1,2,3,4].forEach(n=>{const d=$(`[data-d="${n}"]`);if(!d)return;const s=c.st[n];d.className='dot '+s.c;d.textContent=s.c==='done'?'✓':s.c==='miss'?'!':s.c==='na'?'':'';d.parentElement.title=s.t});
+  F.forEach(f=>{if(f.on){const w=$('[data-fw="'+f.k+'"]');if(w)w.hidden=!applies(f,draft)}});
   const sjw=$('[data-fw="sjust"]'); if(sjw)sjw.hidden=c.nq!==1;
   const sk=$$('[data-skip]'); sk.forEach(e=>e.hidden=!(c.method==='Direct purchase'||c.method==='Emergency'));
   $$('[data-ql]').forEach(e=>{const f=F.find(x=>x.k===e.dataset.ql);e.textContent='Quotation: '+(draft[f.ql]||('Vendor '+f.ql.slice(1)))+', excl. SST (RM)'});
@@ -1508,7 +1535,7 @@ function formPRF(r,c,X){
   y+=slate(x,y,w,'4. JUSTIFICATION FOR RECOMMENDATION',6);
   y+=ROW(x,y,[w],[{t:'Description of Procurement',fill:LB}],{minH:4.8});
   y+=ROW(x,y,[84,24,34,32],['DESCRIPTION OF ITEMS','QTY','Unit Price','Total Amount'].map(t=>({t,b:true,i:true,al:'c',fill:GR,vm:true})),{minH:9.5});
-  const desc=[{t:r.desc,b:true,gap:1},{t:'Scope of Work:',b:true,gap:3},{t:r.scope},{t:'Work area: '+(r.area||'')},{t:'Job Scope:',b:true,gap:3},{t:r.job},{t:'Service Frequency: '+(r.freq||''),gap:3},{t:'Contract Period: '+period(r),b:false,gap:3},{t:'SST: '+pct(r),gap:3}];
+  const desc=pdx(r,[{t:r.desc,b:true,gap:1},{t:'Scope of Work:',b:true,gap:3,svc:1},{t:r.scope,svc:1},{t:'Work area: '+(r.area||'')},{t:'Job Scope:',b:true,gap:3,svc:1},{t:r.job,svc:1},{t:'Service Frequency: '+(r.freq||''),gap:3,svc:1},{t:'Contract Period: '+period(r),b:false,gap:3},{t:'SST: '+pct(r),gap:3}],false);
   y+=ROW(x,y,[84,24,34,32],[{t:desc},{t:String(X.qty),al:'c',vm:false},{t:'RM'+money(X.unit),al:'c'},{t:'RM'+money(X.total),al:'c'}],{minH:Math.max(26,70-extra),pad:2});
   y+=ROW(x,y,[84,24,34,32],[{t:'TOTAL',b:true,al:'r',span:2,fill:LB,vm:true},{t:'',fill:LB},{t:'RM'+money(X.total),b:true,al:'c',fill:LB,vm:true}],{minH:9});
   // page 2
@@ -1576,7 +1603,7 @@ function formRFQ(r,c,X,vname,first){
   y+=ROW(x,y,[w],[HDR('DESCRIPTION OF REQUIREMENT AND PRICE SCHEDULE  (to be priced by the Vendor):')],{minH:5.8});
   const pc=[11,86,17,33,32];
   y+=ROW(x,y,pc,['NO','ITEMS/WORK DESCRIPTION','QTY','PRICE PER UNIT (RM)','TOTAL (RM)'].map(t=>({t,b:true,c:NV,al:'c',fill:GR,vm:true})),{minH:10.5});
-  const desc=[{t:r.desc,b:true,gap:1},{t:'SST: '+pct(r),gap:2.5},{t:'Scope of Work:',b:true,gap:2.5},{t:r.scope},{t:'Work area: '+(r.area||'')},{t:'Job Scope:',b:true,gap:2.5},{t:r.job},{t:'Service Frequency: '+(r.freq||''),b:true,gap:2.5},{t:'Contract Period: '+period(r),b:true,gap:2.5}];
+  const desc=pdx(r,[{t:r.desc,b:true,gap:1},{t:'SST: '+pct(r),gap:2.5},{t:'Scope of Work:',b:true,gap:2.5,svc:1},{t:r.scope,svc:1},{t:'Work area: '+(r.area||'')},{t:'Job Scope:',b:true,gap:2.5,svc:1},{t:r.job,svc:1},{t:'Service Frequency: '+(r.freq||''),b:true,gap:2.5,svc:1},{t:'Contract Period: '+period(r),b:true,gap:2.5}],false);
   y+=ROW(x,y,pc,[{t:'1.',al:'c'},{t:desc},{t:String(X.qty),al:'c'},{t:'RM',al:'c'},{t:'RM',al:'c'}],{minH:68,pad:2});
   y+=ROW(x,y,pc,[{t:[{t:'RINGGIT MALAYSIA:',b:true,c:NV},{t:'______________________________ ONLY.'}],span:2,fill:GR,vm:true},{t:'TOTAL (RM)',b:true,al:'c',span:2,vm:true},{t:'',fill:GD}],{minH:10});
   y+=ROW(x,y,[w],[{t:'Vendor to enter unit price and total only. Do not alter the description, scope or quantity; if a variation is proposed, state it in a separate covering letter.',i:true,c:[90,90,90],sz:7.5,nob:true}],{minH:6,bd:'none'})+2;
@@ -1620,7 +1647,7 @@ function formQA(r,c,X){
   const hy=y; ROW(x,hy,cols.slice(0,3),[{t:'NO',b:true,c:[255,255,255],fill:NV,al:'c',vm:true},{t:'DESCRIPTION OF ITEMS / SCOPE OF WORKS',b:true,c:[255,255,255],fill:NV,vm:true,sz:8},{t:'QTY',b:true,c:[255,255,255],fill:NV,al:'c',vm:true}],{minH:17.5,bd:'sol'});
   ROW(x+84,hy,cols.slice(3),vs.map(v=>({t:v||'',b:true,c:[255,255,255],fill:NV,al:'c',span:2,vm:true,sz:9})),{minH:9,bd:'sol'});
   ROW(x+84,hy+9,cols.slice(3),[0,1,2].flatMap(()=>[{t:'UNIT PRICE',b:true,c:NV,fill:LB,al:'c',sz:7},{t:'TOTAL AMOUNT',b:true,c:NV,fill:LB,al:'c',sz:7}]),{minH:8.5,bd:'sol'}); y=hy+17.5;
-  const desc=[{t:r.desc,b:true},{t:'Scope of Work: '+(r.scope||'')},{t:'Work Area: '+(r.area||'')},{t:'Job Scope: '+(r.job||'')},{t:'Service Frequency: '+(r.freq||'')},{t:'Contract Period: '+period(r)},{t:'SST: '+pct(r)}];
+  const desc=pdx(r,[{t:r.desc,b:true},{t:'Scope of Work: '+(r.scope||''),svc:1},{t:'Work Area: '+(r.area||'')},{t:'Job Scope: '+(r.job||''),svc:1},{t:'Service Frequency: '+(r.freq||''),svc:1},{t:'Contract Period: '+period(r)},{t:'SST: '+pct(r)}],true);
   const vc=[]; q.forEach((v,i)=>{vc.push({t:v!=null?money(v/X.qty):'-',al:'c'},{t:v!=null?money(v):'-',al:'c'})});
   y+=ROW(x,y,cols,[{t:'1',al:'c',vm:true},{t:desc,pad:1.6},{t:String(X.qty),al:'c',vm:true},...vc.map(z=>({...z,vm:true}))],{minH:52,bd:'sol'});
   const gt=[]; q.forEach(v=>{gt.push({t:'',fill:GD},{t:v!=null?money(v):'-',b:true,al:'c',fill:GD})});
@@ -1691,7 +1718,7 @@ function formPO(r,c,X,pages){
   const pc=[12,86,14,28,34];
   y+=ROW(x,y,pc,['NO','ITEMS/WORK DESCRIPTION','QTY','PRICE PER UNIT (RM)','TOTAL (RM)'].map(t=>({t,b:true,c:NV,al:'c',fill:GR,vm:true})),{minH:11,bd:'sol'});
   const sstAmt=(X.total||0)*X.sst, pay=(X.total||0)+sstAmt;
-  const desc=[{t:r.desc},{t:'SST '+pct(r)+(sstAmt?' (RM'+RM(sstAmt)+' added to the total)':''),gap:3},{t:'Scope of Work:',b:true,gap:3},{t:r.scope},{t:'Work area: '+(r.area||'')},{t:'Job Scope:',b:true,gap:3},{t:r.job},{t:'Service Frequency: '+(r.freq||''),b:true,gap:3},{t:'Contract Period: '+period(r),b:true,gap:3}];
+  const desc=pdx(r,[{t:r.desc},{t:'SST '+pct(r)+(sstAmt?' (RM'+RM(sstAmt)+' added to the total)':''),gap:3},{t:'Scope of Work:',b:true,gap:3,svc:1},{t:r.scope,svc:1},{t:'Work area: '+(r.area||'')},{t:'Job Scope:',b:true,gap:3,svc:1},{t:r.job,svc:1},{t:'Service Frequency: '+(r.freq||''),b:true,gap:3,svc:1},{t:'Contract Period: '+period(r),b:true,gap:3}],false);
   y+=ROW(x,y,pc,[{t:'1.',al:'c'},{t:desc},{t:String(X.qty),al:'r'},{t:'RM'+money(X.unit),al:'l'},{t:'RM'+money(pay),al:'l'}],{minH:76,pad:2,bd:'sol'});
   y+=ROW(x,y,pc,[{t:[{t:'RINGGIT MALAYSIA:',b:true,c:NV},{t:words(pay).toUpperCase()+' ONLY.',c:NV}],span:2,fill:GR,vm:true},{t:'TOTAL (RM)',b:true,al:'c',span:2,vm:true},{t:money(pay),b:true,al:'c',fill:GD,vm:true,c:[120,70,0]}],{minH:11,bd:'sol'});
   // page 2
@@ -1741,6 +1768,7 @@ function setView(v){
 document.addEventListener('click',async ev=>{
   const t=ev.target.closest('button,a'); if(!t)return;
   if(t.dataset.view){if(dirty()&&t.dataset.view!=='records'){flash('Save or discard your changes first.');return}setView(t.dataset.view);return}
+  if(t.dataset.lib)return useLib(t.dataset.lib);
   if(t.dataset.usave)return saveUser(t.dataset.usave);
   if(t.id==='export')return exportCsv();
   if(t.dataset.pdf)return makePdf(+t.dataset.pdf);
@@ -1772,6 +1800,7 @@ document.addEventListener('input',ev=>{
   const el=ev.target;
   if(el.id&&el.id.startsWith('lp-')&&el.type!=='file'){lhPreview();return}
   if(el.id==='fq'){fQ=el.value;renderList();return}
+  if(el.id==='libq'){libSearch(el.value);return}
   if(el.dataset.vf==='q'){vf.q=el.value;vtable();return}
   if(!el.dataset.k||!draft)return; handle(el);
 });
@@ -1800,8 +1829,8 @@ async function renderUsers(){
   const [pr,up]=await Promise.all([sb.from('profiles').select('*').order('email'),sb.from('user_properties').select('*')]);
   if(pr.error){X.innerHTML='<h2 class="v">Users</h2><div class="note">Could not load users.</div>';return}
   const map={}; (up.data||[]).forEach(r=>(map[r.user_id]=map[r.user_id]||new Set()).add(r.property_code));
-  X.innerHTML=`<h2 class="v">Users</h2><div class="panel card"><p class="help" style="margin:0 0 10px">Invite people in the Supabase dashboard (Authentication, Users, Invite user). They appear here after they accept. Administrators, Management and the Vendor management team see every project. Property Managers and Viewers see only the properties ticked below.</p><p class="help" style="margin:0 0 10px">Administrator: everything. Property Manager: raises and edits records for their own properties, adds vendors. Management: views all records and the dashboard. Vendor management: maintains the vendor list and blacklists vendors. Viewer: view only.</p>
-  <div class="tw"><table><thead><tr><th>Email</th><th>Role</th><th>Active</th><th>Properties</th><th></th></tr></thead><tbody>${pr.data.map(u=>`<tr data-u="${E(u.id)}"><td>${E(u.email||'')}</td>
+  X.innerHTML=`<h2 class="v">Users</h2><div class="panel card"><p class="help" style="margin:0 0 10px">Invite people in the Supabase dashboard (Authentication, Users, Invite user). They appear here after they accept. The name is used as Requested by on a new PRF. Administrators, Management and the Vendor management team see every project. Property Managers and Viewers see only the properties ticked below.</p><p class="help" style="margin:0 0 10px">Administrator: everything. Property Manager: raises and edits records for their own properties, adds vendors. Management: views all records and the dashboard. Vendor management: maintains the vendor list and blacklists vendors. Viewer: view only.</p>
+  <div class="tw"><table><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Active</th><th>Properties</th><th></th></tr></thead><tbody>${pr.data.map(u=>`<tr data-u="${E(u.id)}"><td>${E(u.email||'')}</td><td><input data-un value="${E(u.full_name||'')}" maxlength="80" aria-label="Name" style="min-width:150px"></td>
    <td><select data-ur aria-label="Role">${ROLES.map(([k,l])=>`<option value="${k}"${u.role===k?' selected':''}>${l}</option>`).join('')}</select></td>
    <td><input type="checkbox" data-ua${u.active?' checked':''} aria-label="Active" style="width:auto;min-height:0"></td>
    <td>${props.map(p=>`<label style="margin-right:10px"><input type="checkbox" data-up="${E(p.code)}"${(map[u.id]&&map[u.id].has(p.code))?' checked':''} style="width:auto;min-height:0"> ${E(p.code)}</label>`).join('')||'None'}</td>
@@ -1809,9 +1838,9 @@ async function renderUsers(){
 }
 async function saveUser(id){
   const row=$('tr[data-u="'+id+'"]'); if(!row)return;
-  const role=$('[data-ur]',row).value, active=$('[data-ua]',row).checked, codes=$$('[data-up]',row).filter(x=>x.checked).map(x=>x.dataset.up);
+  const full_name=$('[data-un]',row).value.trim(), role=$('[data-ur]',row).value, active=$('[data-ua]',row).checked, codes=$$('[data-up]',row).filter(x=>x.checked).map(x=>x.dataset.up);
   if(id===uid&&(role!=='admin'||!active)){flash('You cannot remove your own admin access.');return}
-  let e=(await sb.from('profiles').update({role,active}).eq('id',id)).error;
+  let e=(await sb.from('profiles').update({role,active,full_name}).eq('id',id)).error;
   if(!e){e=(await sb.from('user_properties').delete().eq('user_id',id)).error}
   if(!e&&codes.length){e=(await sb.from('user_properties').insert(codes.map(c=>({user_id:id,property_code:c})))).error}
   flash(e?'Could not save this user.':'User saved');
@@ -1821,7 +1850,7 @@ async function saveUser(id){
 let authMode='login';
 function showAuth(mode,msg){
   authMode=mode; document.body.classList.add('noauth'); $('#auth').hidden=false;
-  const cfg={login:['Sign in','PFMSB Procurement Register','Sign in','Forgot password?',1,1,0],reset:['Reset password','Enter your email and we will send a reset link.','Send reset link','Back to sign in',1,0,0],setpw:['Set your password','Choose a password of at least 8 characters.','Save password','',0,1,1]}[mode];
+  const cfg={login:['Sign in','Strata Procurement Register','Sign in','Forgot password?',1,1,0],reset:['Reset password','Enter your email and we will send a reset link.','Send reset link','Back to sign in',1,0,0],setpw:['Set your password','Choose a password of at least 8 characters.','Save password','',0,1,1]}[mode];
   $('#auth-h').textContent=cfg[0];$('#auth-p').textContent=cfg[1];$('#a-go').textContent=cfg[2];$('#a-alt').textContent=cfg[3];$('#a-alt').hidden=!cfg[3];
   $('#af-email').hidden=!cfg[4];$('#af-pw').hidden=!cfg[5];$('#af-pw2').hidden=!cfg[6];$('#a-pw').autocomplete=mode==='setpw'?'new-password':'current-password';
   $('#a-msg').textContent=msg||'';
@@ -1858,7 +1887,7 @@ async function startApp(){
   if(error||!me||!me.active){
     document.body.classList.add('noauth'); showAuth('login','Your account is not active yet. Ask a PFMSB administrator for access.'); await sb.auth.signOut(); return}
   if(started)return; started=true;
-  ROLE=me.role; canAdmin=ROLE==='admin'; canWrite=canProp=canAdmin||ROLE==='manager'; canVendor=canAdmin||ROLE==='vendor'; canAddVendor=canWrite||canVendor;
+  ROLE=me.role; UNAME=me.full_name||''; canAdmin=ROLE==='admin'; canWrite=canProp=canAdmin||ROLE==='manager'; canVendor=canAdmin||ROLE==='vendor'; canAddVendor=canWrite||canVendor;
   $('#whoami').textContent=(me.email||'')+' ('+((ROLES.find(r=>r[0]===ROLE)||[])[1]||ROLE)+')'; $('#nav-users').hidden=!canAdmin;
   $('#auth').hidden=true; document.body.classList.remove('noauth');
   db=mkdb();
@@ -1868,6 +1897,7 @@ async function startApp(){
   db.collection('settings').onSnapshot(s=>{const d=s.docs.find(x=>x.id==='main');S=Object.assign({},DEF,d?d.data():{});if(view==='setup')renderSetup();if(draft)update()},onErr);
   db.collection('properties').onSnapshot(s=>{props=s.docs.map(d=>d.data()).sort((a,b)=>a.code.localeCompare(b.code));renderList();if(view==='setup')renderSetup();if(view==='vendors'&&!vedit)renderVendors()},onErr);
   db.collection('vendors').onSnapshot(s=>{vendors=s.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>a.name.localeCompare(b.name));if(draft)fillVendors();if(view==='vendors'){if(vedit)vtable();else renderVendors()}},onErr);
+  db.collection('templates').onSnapshot(s=>{LIBR=s.docs.map(d=>Object.assign({},d.data(),{id:d.id}))},()=>{});
   db.collection('records').onSnapshot(s=>{
     recs=s.docs.map(d=>Object.assign({},d.data(),{id:d.id}));
     renderList();
