@@ -1529,11 +1529,10 @@ function formPRF(r,c,X){
     [{t:'2.4 Others (Please specify):'},{t:r.justif,span:4}]],{minH:5.6})+4;
   const extra=Math.max(0,(y-y22)-26);
   const qv=[num(r.q1),num(r.q2),num(r.q3)], vs=[r.v1,r.v2,r.v3];
-  y+=ROW(x,y,[68,28,38,40],[{t:'3. VENDOR',b:true,c:[255,255,255],fill:SL,sz:9.5,vm:true},{t:'AMOUNT (RM)',b:true,c:[255,255,255],fill:SL,al:'c',vm:true},{t:'WARRANTY PERIOD (IF ANY)',b:true,c:[255,255,255],fill:SL,al:'c',vm:true},{t:'RECOMMENDATION',b:true,c:[255,255,255],fill:SL,al:'c',vm:true}],{minH:9});
-  vs.forEach((v,i)=>{y+=ROW(x,y,[68,28,38,40],[{t:(i+1)+'. '+(v||'')},{t:money(qv[i]),al:'c'},{t:'',al:'c'},{t:v&&r.selv?(v===r.selv?'RECOMMENDED':'NOT RECOMMENDED'):'',al:'c'}],{minH:6.5})});
-  y+=ROW(x,y,[w],[{t:'Supporting documents/quotation, and analysis are attached.',sz:7}],{minH:4.6})+4;
-  y+=slate(x,y,w,'4. JUSTIFICATION FOR RECOMMENDATION',6);
-  y+=ROW(x,y,[w],[{t:'Description of Procurement',fill:LB}],{minH:4.8});
+  y+=slate(x,y,w,'3. VENDOR TO INVITE',6);
+  vs.forEach((v,i)=>{y+=ROW(x,y,[w],[{t:(i+1)+'. '+(v||'')}],{minH:6.5})});
+  y+=4;
+  y+=slate(x,y,w,'4. DESCRIPTION OF PROCUREMENT',6);
   y+=ROW(x,y,[84,24,34,32],['DESCRIPTION OF ITEMS','QTY','Unit Price','Total Amount'].map(t=>({t,b:true,i:true,al:'c',fill:GR,vm:true})),{minH:9.5});
   const desc=pdx(r,[{t:r.desc,b:true,gap:1},{t:'Scope of Work:',b:true,gap:3,svc:1},{t:r.scope,svc:1},{t:'Work area: '+(r.area||'')},{t:'Job Scope:',b:true,gap:3,svc:1},{t:r.job,svc:1},{t:'Service Frequency: '+(r.freq||''),gap:3,svc:1},{t:'Contract Period: '+period(r),b:false,gap:3},{t:'SST: '+pct(r),gap:3}],false);
   y+=ROW(x,y,[84,24,34,32],[{t:desc},{t:String(X.qty),al:'c',vm:false},{t:'RM'+money(X.unit),al:'c'},{t:'RM'+money(X.total),al:'c'}],{minH:Math.max(26,70-extra),pad:2});
