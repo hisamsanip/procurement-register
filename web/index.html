@@ -1068,7 +1068,7 @@ function renderList(){
   </div>`+(rows.length?rows.map(({r,c})=>`<button class="item" data-id="${r.id}"${r.id===sel?' aria-current="true"':''}>
       <div class="r"><span class="ref">${E(r.prfno)}</span><span class="pill ${c.exc.some(x=>!x.startsWith('Emergency'))?'bad':'info'}">${E(c.stage)}</span></div>
       <div class="t">${E(r.desc||'Untitled PRF')}</div>
-      <div class="m"><span>${E(c.method||'Method pending')}</span><span>RM ${RM(num(r.est))}</span></div></button>`).join(''):
+      <div class="m"><span>${E(c.method||'No estimate yet')}</span><span>RM ${RM(num(r.est))}</span></div></button>`).join(''):
     `<div class="empty">${recs.length?'No records match.':'No procurement records yet. Choose New record to raise the first PRF.'}</div>`);
   if(keepQ){const q=$('#fq');q.focus();q.setSelectionRange(q.value.length,q.value.length)}
 }
@@ -1156,7 +1156,7 @@ function showStep(n){
 function update(){
   if(!draft)return; const c=calc(draft);
   const set=(k,v)=>$$(`[data-c="${k}"]`).forEach(e=>e.textContent=v);
-  set('method',c.method||'Method pending'); set('stage',c.stage); set('title',draft.desc||'Untitled PRF');
+  set('method',c.method||'No estimate yet'); set('stage',c.stage); set('title',draft.desc||'Untitled PRF');
   set('bal',c.bal==null?'–':(c.bal<0?'−':'')+RM(Math.abs(c.bal))); set('nq',c.nq+' of 3'); set('lowest',RM(c.lowest)); set('appamt',RM(c.appamt));
   set('saving',c.saving==null?'–':RM(c.saving)); set('poamt',RM(c.poamt)); set('potot',RM(c.potot));
   set('rfqno',draft.rfqno||(draft.rfqdate?'Assigned on save':'Assigned when the RFQ date is set'));
@@ -1214,7 +1214,7 @@ function renderDash(){
    <div class="panel kpi"><span>Exceptions</span><b>${exc.length}</b></div></div>
   <div class="grid2">
    <div class="panel card"><h3>Records by stage</h3>${bars(st)}</div>
-   <div class="panel card"><h3>Records by method</h3>${bars(by(x=>x.c.method||'Method pending'))}</div>
+   <div class="panel card"><h3>Records by method</h3>${bars(by(x=>x.c.method||'No estimate yet'))}</div>
    <div class="panel card"><h3>By property</h3><div class="tw"><table><tr><th>Property</th><th class="n">Records</th><th class="n">Estimate</th><th class="n">PO value</th><th class="n">Saving</th><th class="n">Exceptions</th></tr>${pr.map(p=>`<tr><td>${E(p.code)}</td><td class="n">${p.n}</td><td class="n">${RM(p.est)}</td><td class="n">${RM(p.po)}</td><td class="n">${RM(p.sav)}</td><td class="n">${p.ex}</td></tr>`).join('')}</table></div></div>
    <div class="panel card"><h3>PO value by vendor</h3><div class="tw"><table><tr><th>Vendor</th><th class="n">POs</th><th class="n">RM excl. SST</th></tr>${Object.entries(vd).sort((a,b)=>b[1].a-a[1].a).map(([k,v])=>`<tr><td>${E(k)}</td><td class="n">${v.n}</td><td class="n">${RM(v.a)}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">No POs yet.</td></tr>'}</table></div></div>
    <div class="panel card" style="grid-column:1/-1"><h3>Exceptions</h3>${exc.length?exc.map(x=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><a href="#" data-open="${x.r.id}" class="ref">${E(x.r.prfno)}</a> ${E(x.r.desc||'')}<div class="help">${x.c.exc.filter(e=>!e.startsWith('Emergency')).map(E).join(' · ')}</div></div>`).join(''):'<div class="empty">No exceptions.</div>'}</div>
