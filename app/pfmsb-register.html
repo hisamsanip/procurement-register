@@ -329,6 +329,14 @@ td.n{font-family:var(--mono);font-size:12px;letter-spacing:-.02em}
 .vfilters input[type=search]{grid-column:span 2}
 .grid2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
 @media (max-width:560px){.vfilters input[type=search]{grid-column:1/-1}.grid2{grid-template-columns:minmax(0,1fr)}}
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:10px 4px 16px;border-bottom:1px solid var(--border)}
+.phead>div{min-width:0}
+.crumb{font:500 10.5px/16px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--primary);margin-bottom:6px}
+.phead h1{margin:0;font:700 26px/32px var(--font-heading);letter-spacing:-.028em;color:var(--ink)}
+.phead p{margin:4px 0 0;color:var(--ink-soft);font-size:13.5px;max-width:620px}
+.phdate{font:500 12px/16px var(--mono);color:var(--ink-soft);padding:7px 11px;border-radius:8px;background:var(--surface-card);box-shadow:inset 0 0 0 1px var(--border);white-space:nowrap}
+.phdate:empty{display:none}
+h2.v{display:none}
 /* sign-in */
 .authwrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);place-items:stretch;padding:0;background:radial-gradient(700px 420px at 100% 0%,var(--glow),transparent 60%),var(--surface-page)}
 .authside{position:relative;overflow:hidden;display:flex;align-items:center;padding:56px clamp(28px,5vw,72px);color:#fff;background:radial-gradient(620px 360px at 85% 8%,rgba(132,112,255,.55),transparent 65%),radial-gradient(520px 320px at 0% 100%,rgba(56,189,248,.20),transparent 60%),linear-gradient(150deg,#090C1B,#141938 55%,#1D1B54)}
@@ -353,7 +361,7 @@ main>section:not([hidden]){animation:viewIn .22s ease both}
   .app{flex-direction:column}
   .pf-nav{width:auto;position:static;min-height:0;align-self:stretch}
   .pf-nav__tip{display:none}
-  .pf-hero{padding:22px 20px}.pf-hero h1{font-size:22px;line-height:28px}.hstat{flex:1 1 96px;min-width:0}
+  .phead{padding:4px 2px 14px}.phead h1{font-size:22px;line-height:28px}.phdate{display:none}
   .steps{width:100%;overflow-x:auto;flex-wrap:nowrap}.steps button{flex:none}
   .hstats{display:grid;grid-template-columns:1fr 1fr;width:100%}.hstat{min-width:0}.hstat:last-child{grid-column:1/-1}
   .pf-nav__brand{padding:16px 16px 10px}.pf-nav__rule,.pf-nav__sep,.pf-nav__list::before{display:none}
@@ -387,7 +395,7 @@ main>section:not([hidden]){animation:viewIn .22s ease both}
   <div class="pf-nav__tip"><b>Order of work</b><span>PRF approval first, then RFQ, quotation analysis and the purchase order. No document is dated before its approval.</span></div>
 </nav>
 <main class="main">
-  <section class="pf-hero"><div><div class="eyebrow">PFMSB · Procurement control</div><h1>Strata Procurement Register</h1><p>PRF, RFQ, Quotation Analysis and Purchase Order for every property under developer management. Key in once and each form is filled for signature.</p></div><div class="hstats" id="hstats"></div></section>
+  <header class="phead"><div><div class="crumb">Strata Procurement Register</div><h1 id="ph-t">Records</h1><p id="ph-d">Raise a PRF and carry it through RFQ, quotation analysis and purchase order.</p></div><div class="phdate" id="ph-date"></div></header>
   <div id="notice"></div>
   <section id="v-records" class="split">
     <aside id="list" class="panel" aria-label="Records"></aside>
@@ -1188,13 +1196,7 @@ async function createRec(prop,date){
 }
 
 /* ---- list ---- */
-function heroStats(){
-  const h=$('#hstats'); if(!h)return; const all=recs.map(r=>({r,c:calc(r)})), live=all.filter(x=>x.r.cancel!=='Yes');
-  const po=live.reduce((s,x)=>s+(x.c.poamt!=null&&x.r.podate?x.c.poamt:0),0);
-  h.innerHTML=[['Open records',live.filter(x=>!x.r.paydate).length],['Exceptions',all.filter(x=>x.c.exc.some(e=>!e.startsWith('Emergency'))).length],['PO value','RM '+RM(po)]].map(([l,v])=>`<div class="hstat"><span>${l}</span><b>${E(String(v))}</b></div>`).join('');
-}
 function renderList(){
-  heroStats();
   const L=$('#list');
   const keepQ=document.activeElement&&document.activeElement.id==='fq';
   const rows=recs.map(r=>({r,c:calc(r)})).sort((a,b)=>(b.r.createdAt||0)-(a.r.createdAt||0))
@@ -1946,6 +1948,9 @@ function setView(v){
   view=v; ['records','dash','vendors','setup','guide'].forEach(x=>$('#v-'+x).hidden=x!==v);
   if(v==='guide')window.scrollTo(0,0);
   $$('nav [data-view]').forEach(b=>b.setAttribute('aria-current',String(b.dataset.view===v)));
+  const PH={records:['Records','Raise a PRF and carry it through RFQ, quotation analysis and purchase order.'],dash:['Dashboard','Status and value of procurement across your properties.'],vendors:['Vendors','Registered vendors, their trades and their standing.'],setup:['Setup','Approval limits, signatories, properties and letterheads.'],guide:['Guidelines','The procurement documentation procedure, step by step.'],users:['Users','Who can sign in and what each person can see.']}[v];
+  if(PH){$('#ph-t').textContent=PH[0];$('#ph-d').textContent=PH[1]}
+  $('#ph-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
   if(v==='dash')renderDash(); if(v==='setup')renderSetup(); if(v==='vendors')renderVendors();
 }
 document.addEventListener('click',async ev=>{
