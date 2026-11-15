@@ -357,6 +357,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .pf-nav__name,.authside .authside__brand{font-family:"Montserrat",var(--font-heading);font-weight:700;letter-spacing:-.02em}
 .wa{position:relative;display:inline-block}
 .wa::before{content:"";position:absolute;left:12%;right:-2%;top:.13em;height:.11em;border-radius:1em;background:#C6F135;transform:skewX(-24deg)}
+.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 35%,var(--border-strong))}
+.btn.danger:hover{background:var(--danger-tint);border-color:var(--danger)}
+.btn.danger[data-arm]{background:var(--danger);border-color:var(--danger);color:#fff}
 /* sign-in */
 .authwrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);place-items:stretch;padding:0;background:radial-gradient(700px 420px at 100% 0%,var(--glow),transparent 60%),var(--surface-page)}
 .authside{position:relative;overflow:hidden;display:flex;align-items:center;padding:56px clamp(28px,5vw,72px);color:#fff;background:radial-gradient(620px 360px at 85% 8%,rgba(132,112,255,.55),transparent 65%),radial-gradient(520px 320px at 0% 100%,rgba(56,189,248,.20),transparent 60%),linear-gradient(150deg,#090C1B,#141938 55%,#1D1B54)}
@@ -1115,7 +1118,7 @@ const F=[
  {k:'paydate',s:4,l:'Paid on',t:'date'},
  {c:'pono',s:4,l:'PO No'},{c:'poamt',s:4,l:'PO amount, excl. SST (RM)'},{c:'potot',s:4,l:'PO amount incl. SST (RM)'},{c:'days',s:4,l:'Days used / limit'},
 
- {k:'cancel',s:5,g:'Close-out',l:'Cancelled / withdrawn?',t:'sel',o:YN,h:'Yes removes the record from the open pipeline. Records are never deleted.'},
+ {k:'cancel',s:5,g:'Close-out',l:'Cancelled / withdrawn?',t:'sel',o:YN,h:'Yes keeps the record but removes it from the open pipeline. Use Delete record only for a record raised by mistake.'},
  {k:'remarks',s:5,l:'Remarks',t:'area',w:2}
 ];
 const LAB={};F.forEach(f=>{if(f.k)LAB[f.k]=f.l});
@@ -1291,7 +1294,7 @@ function renderEditor(){
     <div class="steps" role="tablist">${STEPS.map(([n,t,s])=>`<button role="tab" data-step="${n}" aria-selected="false"><span class="dot" data-d="${n}"></span>${s?`<span style="color:var(--muted);font-size:11px">${s}</span> `:''}${t}</button>`).join('')}</div>
   </div>
   <div class="exc" id="exc" hidden></div>${body}
-  <div class="bar"><span class="grow" id="sv"></span><button class="btn" id="discard">Discard changes</button><button class="btn pri" id="save"${canWrite?'':' disabled'}>Save</button></div>`;
+  <div class="bar"><span class="grow" id="sv"></span><button class="btn danger" id="delrec" type="button"${canWrite?'':' hidden'}>Delete record</button><button class="btn" id="discard">Discard changes</button><button class="btn pri" id="save"${canWrite?'':' disabled'}>Save</button></div>`;
   F.forEach(f=>{if(f.k&&$('#f-'+f.k)){const el=$('#f-'+f.k);if(f.t==='vendor'||f.t==='selv')return;el.value=draft[f.k]==null?'':String(draft[f.k]);if(f.big){const cn=$('[data-cnt="'+f.k+'"]');if(cn)cn.textContent=el.value.length+' / 1000 characters'}}});
   fillVendors(); showStep(step); update();
   if(!canWrite)$$('#editor input,#editor select,#editor textarea').forEach(x=>x.disabled=true);
@@ -2043,6 +2046,13 @@ document.addEventListener('click',async ev=>{
   if(t.id==='newb'){newOpen=!newOpen;renderList();return}
   if(t.id==='ncreate'){const p=$('#np').value,d=$('#nd').value;if(!p||!d){flash('Choose a property and a date.');return}return createRec(p,d)}
   if(t.dataset.step){showStep(+t.dataset.step);return}
+  if(t.id==='delrec'){
+    if(!canWrite||!sel)return;
+    if(!t.dataset.arm){t.dataset.arm='1';t.textContent='Click again to delete permanently';clearTimeout(t._tm);t._tm=setTimeout(()=>{delete t.dataset.arm;t.textContent='Delete record'},4500);return}
+    const id=sel, ref=(recs.find(x=>x.id===id)||{}).prfno||'the record';
+    try{await del('records/'+id);recs=recs.filter(x=>x.id!==id);sel=null;draft=null;saved='';renderList();renderEditor();flash(ref+' deleted')}
+    catch(e){delete t.dataset.arm;t.textContent='Delete record';flash('Could not delete the record ('+(e&&(e.code||e.message)||'error')+').')}
+    return}
   if(t.id==='save')return saveRec();
   if(t.id==='discard'){draft=Object.assign({},recs.find(x=>x.id===sel));renderEditor();return}
   if(t.id==='back'){if(dirty()){flash('Save or discard your changes first.');return}sel=null;draft=null;saved='';renderList();renderEditor();return}
@@ -2063,6 +2073,21 @@ document.addEventListener('click',async ev=>{
   if(t.dataset.vdoc){const v=vendors.find(x=>x.id===t.dataset.vdoc);if(!v||!v.ssmdoc)return;try{await FS.open(v)}catch(e){if(!(e&&e.code==='declined'))flash('Could not open the SSM document.')}return}
   if(t.dataset.dv){if(!canVendor)return;const v=vendors.find(x=>x.id===t.dataset.dv);if(v&&recs.some(r=>[r.v1,r.v2,r.v3,r.selv].includes(v.name))){flash('That vendor is used in a record and cannot be removed. Blacklist it instead.');return}try{await del('vendors/'+t.dataset.dv);vendors=vendors.filter(x=>x.id!==t.dataset.dv);vedit=null;renderVendors()}catch(e){flash('Could not remove.')}return}
 });
+/* ---- text case: sentence case for descriptions, capitalised words for names ---- */
+const NOCASE=new Set(['f-meeting','f-bcode','lp-code','lp-tel','lp-mail','lp-lic','vr','vs','vt','ve','libq','fq','blr0']);
+const WCASE=new Set(['f-reqby','f-reqdes','lp-name','lp-pm','lp-be','lp-rpm','lp-addr','vn','vc','t-opsN','t-opsD','t-ceoN','t-ceoD','r-name','r-des','r-co']);
+const LOWW=new Set(['bin','binti','bt','bte','b.','bt.','a/l','a/p','and','of','dan','di','&']);
+const tidy=s=>s.replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').trim();
+const shout=s=>/[A-Z]/.test(s)&&!/[a-z]/.test(s)&&s.replace(/[^A-Z]/g,'').length>8;
+function sCase(s){s=tidy(s);if(shout(s))s=s.toLowerCase();return s.replace(/(^|[.!?]\s+|\n)([a-z])/g,(m,a,b)=>a+b.toUpperCase())}
+function wCase(s){s=tidy(s);if(shout(s))s=s.toLowerCase();return s.split(' ').map(w=>/^[A-Z][A-Z'\-]{3,}$/.test(w)?w[0]+w.slice(1).toLowerCase():w).map((w,i)=>(i&&LOWW.has(w.toLowerCase()))?w.toLowerCase():/^[a-z]/.test(w)&&w===w.toLowerCase()?w[0].toUpperCase()+w.slice(1):w).join(' ')}
+document.addEventListener('change',ev=>{
+  const el=ev.target; if(!el||el.disabled||el.readOnly)return;
+  const tx=el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&(el.type==='text'||el.type===''));
+  if(!tx||NOCASE.has(el.id)||el.dataset.nocase!=null)return;
+  const v=(WCASE.has(el.id)||el.dataset.wcase!=null)?wCase(el.value):sCase(el.value);
+  if(v!==el.value){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}))}
+},true);
 document.addEventListener('input',ev=>{
   const el=ev.target;
   if(el.id&&el.id.startsWith('lp-')&&el.type!=='file'){lhPreview();return}

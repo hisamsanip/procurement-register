@@ -11,16 +11,21 @@
 - Site URL: your Vercel URL.
 - Add the same URL under Redirect URLs (needed for invite and reset-password links).
 
-## First admin
-Invite yourself (Authentication > Users > Invite user), accept the email, then run in the SQL editor:
-`update public.profiles set role='admin' where email='YOUR_EMAIL';`
-After that, manage roles and property access in the app's **Users** page.
+## Access requests
+New users click **Request access** on the sign-in page, set their own password and give their name, designation, company and projects. Every new account waits as *pending* until an administrator approves it on the **Users** page.
+Supabase: Authentication > Sign In / Providers > **Allow new users to sign up** must be ON (approval is enforced by the app and the database).
+
+## Email to administrators
+`supabase/functions/notify-admin` emails every active administrator when a request arrives. It needs a Resend API key stored as the Edge Function secret `RESEND_API_KEY` (optional `MAIL_FROM`, `APP_URL`). Without the key, requests still appear on the Users page.
+
+## Audit log
+Every create, change and delete on records, vendors, properties, setup, users and project access, plus every sign-in, is written to `audit_log` by database triggers. Only administrators can read it (Audit log page).
 
 ## Roles
-- Administrator: everything, all projects
-- Property Manager: raises and edits records for assigned properties only; can add vendors with an SSM document
+- Administrator: everything, all projects; approves users; audit log
+- Property Manager: raises, edits and deletes records for assigned properties only; can add vendors with an SSM document
 - Management: views all projects and the dashboard, no editing
 - Vendor management: maintains the vendor list, blacklists vendors; records are view only
 - Viewer: read-only for assigned properties
 
-Database changes after the first setup are in `migrations/`. Run each once in the Supabase SQL editor.
+Database changes are in `migrations/`. Run each once, in order, in the Supabase SQL editor.
