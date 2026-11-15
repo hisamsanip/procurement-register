@@ -1,4 +1,4 @@
-# Procurata — Strata Procurement Register
+# Procurata by PFMSB — Strata Procurement Register
 
 Backup of the PFMSB procurement system for stratified developments under developer management.
 

@@ -1,11 +1,11 @@
 <!doctype html><html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body class="noauth">
-<title>Procurata</title>
+<title>Procurata by PFMSB</title>
 <link rel="shortcut icon" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#1A1260">
-<meta name="description" content="Procurata, the Strata Procurement Register: PRF, RFQ, quotation analysis, direct sourcing and purchase orders for every property.">
-<meta property="og:title" content="Procurata · Strata Procurement Register">
+<meta name="description" content="Procurata by PFMSB, the Strata Procurement Register: PRF, RFQ, quotation analysis, direct sourcing and purchase orders for every property.">
+<meta property="og:title" content="Procurata by PFMSB · Strata Procurement Register">
 <meta property="og:description" content="Every purchase, documented from request to payment.">
 <meta property="og:image" content="/og-image.png">
 <meta property="og:type" content="website">
@@ -369,6 +369,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 35%,var(--border-strong))}
 .btn.danger:hover{background:var(--danger-tint);border-color:var(--danger)}
 .btn.danger[data-arm]{background:var(--danger);border-color:var(--danger);color:#fff}
+.byline{display:block;font:600 10.5px/14px var(--font-body);letter-spacing:.02em;color:#C6F135;margin-top:1px}
+.bywrap{display:flex;flex-direction:column;line-height:1.1}
+.authside .authside__brand .byline{font-size:11.5px;margin-top:3px}
 .linkbtn{background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--primary);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .reqline{text-align:center;font-size:13px;color:var(--ink-soft);padding-top:6px;border-top:1px solid var(--border);margin-top:4px}
 .reqline[hidden]{display:none}
@@ -428,7 +431,7 @@ main>section:not([hidden]){animation:viewIn .22s ease both}
 
 <div class="app">
 <nav class="pf-nav" aria-label="Views">
-  <div class="pf-nav__brand"><div class="pf-nav__logo"></div><div class="pf-nav__name">Procurat<span class="wa">a</span><small>Strata Procurement Register</small></div></div>
+  <div class="pf-nav__brand"><div class="pf-nav__logo"></div><div class="pf-nav__name">Procurat<span class="wa">a</span><span class="byline">by PFMSB</span><small>Strata Procurement Register</small></div></div>
   <div class="pf-nav__rule"></div>
   <div class="pf-nav__list">
     <button class="pf-nav__item" data-view="records" aria-current="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h.01 M3 12h.01 M3 19h.01 M8 5h13 M8 12h13 M8 19h13"/></svg><span>Records</span></button>
@@ -445,7 +448,7 @@ main>section:not([hidden]){animation:viewIn .22s ease both}
   <div class="pf-nav__tip"><b>Order of work</b><span>PRF approval first, then RFQ, quotation analysis and the purchase order. No document is dated before its approval.</span></div>
 </nav>
 <main class="main">
-  <header class="phead"><div><div class="crumb">Procurata</div><h1 id="ph-t">Records</h1><p id="ph-d">Raise a PRF and carry it through RFQ, quotation analysis and purchase order.</p></div><div class="phdate" id="ph-date"></div></header>
+  <header class="phead"><div><div class="crumb">Procurata by PFMSB</div><h1 id="ph-t">Records</h1><p id="ph-d">Raise a PRF and carry it through RFQ, quotation analysis and purchase order.</p></div><div class="phdate" id="ph-date"></div></header>
   <div id="notice"></div>
   <section id="v-records" class="split">
     <aside id="list" class="panel" aria-label="Records"></aside>
@@ -1030,7 +1033,7 @@ main>section:not([hidden]){animation:viewIn .22s ease both}
   <div class="pvhead"><div><b id="pv-t">Preview</b><small id="pv-n"></small></div><div class="pvbtns"><button class="btn" id="pv-x" type="button">Close</button><button class="btn pri" id="pv-dl" type="button">Download PDF</button></div></div>
   <div class="pvpages" id="pv-pages"></div></div></div>
 <div id="auth" class="authwrap" hidden><div class="authside"><div class="authside__in">
-  <div class="authside__brand"><span class="pf-nav__logo"></span><span>Procurat<span class="wa">a</span></span></div>
+  <div class="authside__brand"><span class="pf-nav__logo"></span><span class="bywrap"><span>Procurat<span class="wa">a</span></span><span class="byline">by PFMSB</span></span></div>
   <h2>Every purchase, documented from request to payment.</h2>
   <p>One register for the PRF, RFQ, Quotation Analysis and Purchase Order of every property under management.</p>
   <div class="flow"><span>PRF</span><i></i><span>RFQ</span><i></i><span>QA</span><i></i><span>PO</span></div>
@@ -1038,7 +1041,7 @@ main>section:not([hidden]){animation:viewIn .22s ease both}
 </div></div>
 <div class="authcard">
   <div class="pf-nav__logo" style="margin-bottom:14px"></div>
-  <h1 id="auth-h">Sign in</h1><p id="auth-p" class="help">Procurata · Strata Procurement Register</p>
+  <h1 id="auth-h">Sign in</h1><p id="auth-p" class="help">Procurata by PFMSB · Strata Procurement Register</p>
   <form id="authform" novalidate>
     <div id="af-email"><label class="l" for="a-email">Username (email)</label><input id="a-email" type="email" autocomplete="username" required></div>
     <div id="af-pw"><label class="l" for="a-pw">Password</label><input id="a-pw" type="password" autocomplete="current-password"></div>
@@ -2248,7 +2251,7 @@ async function renderAudit(){
 let authMode='login';
 function showAuth(mode,msg){
   authMode=mode; document.body.classList.add('noauth'); $('#auth').hidden=false;
-  const cfg={login:['Sign in','Procurata · Strata Procurement Register','Sign in','Forgot password?',1,1,0],reset:['Reset password','Enter your email and we will send a reset link.','Send reset link','Back to sign in',1,0,0],setpw:['Set your password','Choose a password of at least 8 characters.','Save password','',0,1,1],request:['Request access','Create your password and tell us who you are. An administrator approves each request.','Send request','Back to sign in',1,1,1]}[mode];
+  const cfg={login:['Sign in','Procurata by PFMSB · Strata Procurement Register','Sign in','Forgot password?',1,1,0],reset:['Reset password','Enter your email and we will send a reset link.','Send reset link','Back to sign in',1,0,0],setpw:['Set your password','Choose a password of at least 8 characters.','Save password','',0,1,1],request:['Request access','Create your password and tell us who you are. An administrator approves each request.','Send request','Back to sign in',1,1,1]}[mode];
   $('#af-req').hidden=mode!=='request'; $('#a-reqline').hidden=mode!=='login'; $('#a-email').autocomplete=mode==='request'?'email':'username';
   if(mode==='request')loadReqProps();
   $('#auth-h').textContent=cfg[0];$('#auth-p').textContent=cfg[1];$('#a-go').textContent=cfg[2];$('#a-alt').textContent=cfg[3];$('#a-alt').hidden=!cfg[3];
