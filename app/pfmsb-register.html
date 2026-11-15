@@ -1948,14 +1948,16 @@ function formDS(r,c,X){
   y+=slate(x,y,w,'2. VENDOR',5.5);
   K('Vendor',r.v1); K('SSM registration no.',v.ssm); K('Person in charge',[v.contact,v.tel].filter(Boolean).join(', ')); K('Email',v.email); y+=3;
   y+=slate(x,y,w,'3. QUOTATION AND PRICE CHECK',5.5);
-  const cc=[70,34,35,35], df=a=>(a!=null&&q!=null)?money(a-q):'-';
-  y+=ROW(x,y,cc,['Item','Amount, excl. SST (RM)','Difference vs quotation (RM)','Remarks'].map(t=>({t,b:true,al:'c',fill:GR,vm:true,sz:7.5})),{minH:8});
+  const cc=[70,34,35,35], df=a=>(a!=null&&q!=null)?money(a-q):'-', VG=[236,236,236], tax=q!=null?q*sst:null;
+  y+=ROW(x,y,cc,['Item','Amount (RM)','Variation (RM)','Remarks'].map((t,i)=>({t,b:true,al:'c',fill:GR,vm:true,sz:7.5})),{minH:7});
   y+=ROWS(x,y,cc,[
-    [{t:'Quotation received',b:true,fill:LB},{t:money(q),al:'r',b:true,fill:LB},{t:'-',al:'r',fill:LB},{t:sst?'SST '+pct(r)+' applies':'No SST',fill:LB,sz:7.5}],
-    [{t:'PRF estimate'},{t:money(est),al:'r'},{t:df(est),al:'r'},{t:''}],
-    [{t:'Approved budget'},{t:money(bud),al:'r'},{t:df(bud),al:'r'},{t:''}],
-    [{t:'Previous purchase'},{t:money(prev),al:'r'},{t:df(prev),al:'r'},{t:''}]],{minH:5.6});
-  y+=ROW(x,y,[70,w-70],[{t:'Total including SST (RM)',b:true,fill:GR},{t:money(q!=null?q*(1+sst):null),b:true}],{minH:5.8})+3;
+    [{t:'Quotation received, excl. SST',b:true,fill:LB},{t:money(q),al:'r',b:true,fill:LB},{t:'',fill:VG},{t:'',fill:LB}],
+    [{t:'SST '+(sst?pct(r):'(not applicable)')},{t:sst?money(tax):'-',al:'r'},{t:'',fill:VG},{t:''}],
+    [{t:'Total including SST',b:true,fill:GR},{t:money(q!=null?q+(tax||0):null),al:'r',b:true,fill:GR},{t:'',fill:VG},{t:'',fill:GR}],
+    [{t:'PRF estimate'},{t:money(est),al:'r'},{t:df(est),al:'r',fill:VG},{t:''}],
+    [{t:'Approved budget'},{t:money(bud),al:'r'},{t:df(bud),al:'r',fill:VG},{t:''}],
+    [{t:'Previous purchase'},{t:money(prev),al:'r'},{t:df(prev),al:'r',fill:VG},{t:''}]],{minH:5.6});
+  y+=ROW(x,y,[w],[{t:'Variation = amount less the quotation received (excl. SST). A negative figure means the quotation is above that amount.',i:true,sz:7}],{minH:5})+3;
   y+=slate(x,y,w,'4. JUSTIFICATION FOR DIRECT SOURCING',5.5);
   SJ.forEach(s=>{y+=ROW(x,y,[w],[{t:[{parts:[{box:r.sjust===s},{t:'  '+s}]}]}],{minH:5.6})});
   y+=ROW(x,y,[w],[{t:'Explanation',fill:LB}],{minH:5});
