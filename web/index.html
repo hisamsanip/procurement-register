@@ -1531,7 +1531,7 @@ function renderDash(){
 /* ---- setup ---- */
 function renderSetup(){
   const X=$('#v-setup'); const lbl={direct:'Direct purchase limit (RM)',quot:'Quotation limit (RM)',minq:'Minimum quotations',validity:'Default quotation validity (days)',d_direct:'Direct purchase time limit (days)',d_quot:'Quotation time limit (days)',d_tender:'Tender time limit (days)'};
-  X.innerHTML=`<h2 class="v">Setup</h2>${canAdmin?'':canProp?'<div class="note">You can add a property and set its letterhead and logo. Limits and signatories are set by an administrator.</div>':'<div class="note">You can view the setup but not change it.</div>'}
+  X.innerHTML=`<h2 class="v">Setup</h2>${canAdmin?'':canProp?'<div class="note">You can edit the letterhead and logo of your properties. Only an administrator can add a property, and set the limits and signatories.</div>':'<div class="note">You can view the setup but not change it.</div>'}
   <div class="panel card" style="margin-bottom:16px"><h3>Limits (Garis Panduan 2020)</h3>
    <div class="setgrid">${Object.keys(lbl).map(k=>`<div><label class="l" for="s-${k}">${lbl[k]}</label><input type="number" id="s-${k}" data-s="${k}" min="0" value="${S[k]}"></div>`).join('')}</div>
    <h3 style="margin-top:6px">Signatories on the PDFs</h3>
@@ -1546,10 +1546,10 @@ function renderSetup(){
   <div class="grid2">
    <div class="panel card" style="grid-column:1/-1"><h3>Properties and letterhead</h3>
     <div class="tw"><table>${props.map(p=>`<tr class="${pedit===p.code?'sel':''}"><td class="ref">${E(p.code)}</td><td>${E(p.name||'')}</td><td class="n"><button class="btn sm" data-pe="${E(p.code)}">${canProp?'Edit':'View'}</button> <button class="btn sm" data-dp="${E(p.code)}"${canAdmin?'':' disabled'}>Remove</button></td></tr>`).join('')||'<tr><td class="empty">No properties yet.</td></tr>'}</table></div>
-    <div class="pbtns"><button class="btn" data-pnew="1"${canProp?'':' disabled'}>New property</button></div>
+    <div class="pbtns"><button class="btn" data-pnew="1"${canAdmin?'':' disabled'}>New property</button></div>
     <h3 style="margin-top:18px">${pedit?'Edit '+E(pedit):'New property'}</h3>
     <div class="pform">
-     <div><label class="l" for="lp-code">Property code <i>*</i></label><input id="lp-code" maxlength="10" placeholder="e.g. PRBK"${pedit?' readonly':''}><div class="help">Used in every reference number, for example PRBK. Cannot change after creation.</div></div>
+     <div><label class="l" for="lp-code">Property code <i>*</i></label><input id="lp-code" maxlength="10" placeholder="e.g. PRBK"${pedit?' readonly':''}><div class="help">Used in every reference number, for example PRBK. Each code must be unique and cannot change after creation.</div></div>
      <div class="full"><label class="l" for="lp-name">Project name <i>*</i></label><input id="lp-name" maxlength="120" placeholder="e.g. Residensi PR1MA @ Bukit Katil"></div>
      <div class="full"><label class="l" for="lp-addr">Address <i>*</i></label><textarea id="lp-addr" rows="2" maxlength="300" placeholder="Management office address"></textarea></div>
      <div><label class="l" for="lp-tel">Contact number</label><input id="lp-tel" maxlength="40" placeholder="e.g. 0182979740"></div>
@@ -1682,10 +1682,10 @@ async function saveProp(){
   const p=curProp();
   if(!p.code){flash('Enter a property code.');return}
   if(!p.name||!p.address||!p.pmco){flash('Enter the project name, address and property management company.');return}
-  if(!pedit&&props.some(x=>x.code===p.code)){flash('That property code already exists. Choose it from the list to edit.');return}
+  if(!pedit&&props.some(x=>x.code===p.code)){flash('The property code '+p.code+' is already used. Enter a different code.');return}
   const old=props.find(x=>x.code===p.code)||{}; const doc=Object.assign({},old,p); if(!pLogo){delete doc.logo;delete doc.logoW;delete doc.logoH}
   try{await w('properties/'+p.code,doc);if(!db){props=props.filter(x=>x.code!==p.code).concat([doc]).sort((a,b)=>a.code.localeCompare(b.code))}pedit=p.code;flash('Property saved');renderSetup()}
-  catch(e){flash('Could not save ('+(e&&e.code||'error')+'). If a logo is large, remove it and try again.')}
+  catch(e){const c=e&&e.code; flash(c==='23505'||c==='42501'&&!pedit?'The property code '+p.code+' is already used. Enter a different code.':'Could not save ('+(c||'error')+'). If a logo is large, remove it and try again.')}
 }
 async function letterheadPdf(){
   const p=curProp(); if(!p.name){flash('Enter the project name first.');return}
