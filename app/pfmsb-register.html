@@ -1452,9 +1452,11 @@ async function readSSMFile(inp){
   const say=(m,c)=>{if(run===ocrRun){st.textContent=m;st.className='ocrst'+(c?' '+c:'')}}; ocrMsg=say;
   if(!f){say('');return}
   if(!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type)||f.size>FS.max){say('');return}
-  let out;
-  try{out=parseSSM(await ssmText(f,say))}
-  catch(e){say('The details could not be read automatically here. Please enter them below.','err');return}
+  let out=null;
+  if(window.ssmRemote){say('Reading the document…');try{const r=await window.ssmRemote(f);if(r&&(r.name||r.ssm||r.address))out=r}catch(e){out=null}}
+  if(!out){
+    try{out=parseSSM(await ssmText(f,say))}
+    catch(e){say('The details could not be read automatically here. Please enter them below.','err');return}}
   if(run!==ocrRun)return;
   const got=[];
   [['name','Vendor name'],['ssm','SSM no.'],['address','address'],['state','state'],['tel','telephone'],['email','email']].forEach(([k,lbl])=>{

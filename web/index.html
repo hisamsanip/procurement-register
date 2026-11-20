@@ -1118,6 +1118,10 @@ function mkdb(){return{
     (LS[col]=LS[col]||[]).push(load); load();
     const ch=sb.channel('rt-'+col).on('postgres_changes',{event:'*',schema:'public',table:col},()=>{clearTimeout(tm);tm=setTimeout(load,250)}).subscribe();
     return()=>{alive=false;sb.removeChannel(ch)}}})}}
+window.ssmRemote=async function(file){
+  const u=new Uint8Array(await file.arrayBuffer());let bin='';for(let i=0;i<u.length;i+=0x8000)bin+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));
+  const {data,error}=await sb.functions.invoke('extract-ssm',{body:{mime:file.type,data:btoa(bin)}});
+  return (!error&&data&&data.ok)?data.fields:null};
 const DL={save:async({filename,data})=>{
   const blob=data instanceof Blob?data:new Blob([data],{type:'text/csv;charset=utf-8'});
   const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}};
@@ -1503,9 +1507,11 @@ async function readSSMFile(inp){
   const say=(m,c)=>{if(run===ocrRun){st.textContent=m;st.className='ocrst'+(c?' '+c:'')}}; ocrMsg=say;
   if(!f){say('');return}
   if(!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type)||f.size>FS.max){say('');return}
-  let out;
-  try{out=parseSSM(await ssmText(f,say))}
-  catch(e){say('The details could not be read automatically here. Please enter them below.','err');return}
+  let out=null;
+  if(window.ssmRemote){say('Reading the document…');try{const r=await window.ssmRemote(f);if(r&&(r.name||r.ssm||r.address))out=r}catch(e){out=null}}
+  if(!out){
+    try{out=parseSSM(await ssmText(f,say))}
+    catch(e){say('The details could not be read automatically here. Please enter them below.','err');return}}
   if(run!==ocrRun)return;
   const got=[];
   [['name','Vendor name'],['ssm','SSM no.'],['address','address'],['state','state'],['tel','telephone'],['email','email']].forEach(([k,lbl])=>{
