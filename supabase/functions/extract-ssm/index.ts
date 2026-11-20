@@ -1,6 +1,6 @@
 // Reads an SSM company profile (PDF, JPG or PNG) with the Claude API and returns the vendor details.
 // Called from the Add vendor form after a user attaches the SSM document. The user always reviews the result.
-// Needs the secret ANTHROPIC_API_KEY. Optional: ANTHROPIC_MODEL (default claude-sonnet-5-5).
+// Needs the secret ANTHROPIC_API_KEY. Optional: ANTHROPIC_MODEL (default claude-haiku-5-5).
 // Without the key the function answers {ok:false, reason:"not_configured"} and the app falls back to reading in the browser.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
@@ -66,7 +66,7 @@ if (typeof Deno !== "undefined" && (Deno as any).serve) {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-        body: JSON.stringify({ model: Deno.env.get("ANTHROPIC_MODEL") || "claude-sonnet-5-5", max_tokens: 600, temperature: 0, messages: [{ role: "user", content: [block, { type: "text", text: PROMPT }] }] }),
+        body: JSON.stringify({ model: Deno.env.get("ANTHROPIC_MODEL") || "claude-haiku-5-5", max_tokens: 600, temperature: 0, messages: [{ role: "user", content: [block, { type: "text", text: PROMPT }] }] }),
         signal: AbortSignal.timeout(90_000),
       });
       if (!r.ok) { console.log("anthropic error", r.status, (await r.text()).slice(0, 300)); return json({ ok: false, reason: "reader_error" }); }
