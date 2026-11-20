@@ -136,6 +136,7 @@ textarea{min-height:68px;resize:vertical}
 .pvhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--border)}
 .pvhead b{display:block;font:600 16px/22px var(--font-heading)}.pvhead small{color:var(--ink-soft);font-size:12px;overflow-wrap:anywhere}
 .pvbtns{display:flex;gap:8px}
+.ocrst{font-size:12.5px;color:var(--ink-soft);margin-top:4px;min-height:0}.ocrst.ok{color:var(--success,#157347)}.ocrst.err{color:var(--danger,#b42318)}input.ocrf,select.ocrf,textarea.ocrf{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-tint)}
 .qvbody{overflow:auto;padding:16px}.qvadd{margin-top:6px}
 .pvpages{overflow:auto;padding:16px;background:var(--slate-tint);display:grid;gap:14px;justify-items:center;min-height:160px}
 .pvpages canvas{width:100%;max-width:794px;height:auto;background:#fff;box-shadow:0 2px 10px rgba(15,27,61,.18)}
@@ -1403,12 +1404,85 @@ function fillVendors(){
     const b=document.createElement('button');b.type='button';b.className='btn sm qvadd';b.dataset.qv=k;b.textContent='Vendor not listed? Add new vendor';el.insertAdjacentElement('afterend',b)});
   fillSelv();
 }
+/* ---- read the SSM document (text layer first, OCR for scans and photos) ---- */
+const OCR_JS='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js', OCR_LANG='https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng/4.0.0_best_int';
+let ocrW=null, ocrMsg=null;
+async function ocrWorker(){
+  if(!window.Tesseract)await addScript(OCR_JS);
+  if(!ocrW)ocrW=window.Tesseract.createWorker('eng',1,{langPath:OCR_LANG,logger:m=>{if(ocrMsg&&m&&m.status==='recognizing text')ocrMsg('Reading the document… '+Math.round((m.progress||0)*100)+'%')}});
+  try{return await ocrW}catch(e){ocrW=null;throw e}
+}
+async function ocrCanvas(cv){const wk=await ocrWorker();const r=await wk.recognize(cv);return r.data&&r.data.text||''}
+function imgToCanvas(file,max){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));
+    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c)};
+  im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('image'))};im.src=u})}
+async function ssmText(file,say){
+  if(file.type==='application/pdf'){
+    say('Reading the document…');
+    const lib=await pdfLib(); const pdf=await lib.getDocument({data:await file.arrayBuffer()}).promise; const n=Math.min(pdf.numPages,2); let txt='';
+    for(let i=1;i<=n;i++){const pg=await pdf.getPage(i),tc=await pg.getTextContent();let ly=null;
+      tc.items.forEach(it=>{const y=it.transform?Math.round(it.transform[5]):0;if(ly!==null&&Math.abs(y-ly)>3)txt+='\n';else if(ly!==null)txt+=' ';txt+=it.str;ly=y});txt+='\n'}
+    if(txt.replace(/\s/g,'').length>=60)return txt;
+    txt=''; say('This PDF is a scan. Reading it with OCR…');
+    for(let i=1;i<=n;i++){const pg=await pdf.getPage(i),vp=pg.getViewport({scale:2.2}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+      await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;txt+=await ocrCanvas(c)+'\n'}
+    return txt;
+  }
+  say('Reading the document with OCR. The first time can take a minute…');
+  return ocrCanvas(await imgToCanvas(file,2200));
+}
+const SSTATE=[['WP Putrajaya',/putrajaya/i],['WP Labuan',/labuan/i],['WP Kuala Lumpur',/kuala\s+lumpur|\bw\.?\s?p\.?\b|\bk\.?l\.?\b/i],['Pulau Pinang',/pulau\s+pinang|penang|george\s?town|butterworth|bayan\s+lepas/i],['Negeri Sembilan',/negeri\s+sembilan|seremban|nilai\b/i],['Melaka',/melaka|malacca/i],['Johor',/johor|johore/i],['Kedah',/kedah/i],['Kelantan',/kelantan/i],['Pahang',/pahang/i],['Perak',/perak/i],['Perlis',/perlis/i],['Sabah',/sabah|kota\s+kinabalu/i],['Sarawak',/sarawak|kuching/i],['Selangor',/selangor/i],['Terengganu',/terengganu/i]];
+function parseSSM(raw){
+  const L=String(raw||'').replace(/\r/g,'').split('\n').map(s=>s.replace(/[|_¦]+/g,' ').replace(/\s+/g,' ').trim()).filter(Boolean), T=L.join('\n'), o={};
+  const NEWN=/\b(\d{12})\b/, OLDN=/\b(\d{5,7})\s*-\s*([A-Z])\b/;
+  let m=T.match(/(?:company|registration|reg\.?|syarikat|pendaftaran|business|perniagaan|roc|rob)[^\n\d]{0,25}(?:no\.?|number|nombor)?[^\n\d]{0,12}(\d{12}|\d{5,7}\s*-\s*[A-Z])/i);
+  const nn=(m&&/^\d{12}$/.test(m[1])?m[1]:null)||(T.match(NEWN)||[])[1], on=T.match(OLDN);
+  if(nn&&on)o.ssm=nn+' ('+on[1]+'-'+on[2]+')'; else if(nn)o.ssm=nn; else if(m)o.ssm=m[1].replace(/\s+/g,''); else if(on)o.ssm=on[1]+'-'+on[2];
+  const SUF=/\b(SDN\.?\s*BHD\.?|BERHAD|BHD\.?|ENTERPRISES?|TRADING|RESOURCES|PLT|LLP|SERVICES|ENGINEERING|HOLDINGS|INDUSTRIES|CONTRACTOR[S]?|CONSTRUCTION)\b/i, BAD=/COMMISSION|SURUHANJAYA|COMPANIES\s+ACT|AKTA|CERTIFICATE|SIJIL|FORM\s+\d|BORANG|MALAYSIA\b.*\b(ACT|COMMISSION)/i;
+  const clean=s=>s.replace(/\(\s*(?:company|co\.?|no)[^)]*\)?/ig,'').replace(/\b(?:company|registration)\s*no\.?.*$/i,'').replace(/[:;,\-\s]+$/,'').replace(/^[:;,\-\s]+/,'').trim();
+  let name=''; const lab=/(?:company\s*name|name\s*of\s*(?:company|business)|business\s*name|nama\s*(?:syarikat|perniagaan))\s*[:\-]?\s*(.*)$/i;
+  for(let i=0;i<L.length&&!name;i++){const k=L[i].match(lab);if(k){const c=clean(k[1]||'')||clean(L[i+1]||'');if(c&&c.length>2&&c.length<100)name=c}}
+  if(!name){const k=T.replace(/\n/g,' ').match(/(?:certify\s+that|diperakui\s+bahawa|bahawa)\s+(.{3,90}?)\s+(?:is\s+this\s+day|adalah|telah|was|dengan\s+ini)/i);if(k&&SUF.test(k[1]))name=clean(k[1])}
+  if(!name){const c=L.find(s=>s.length<95&&SUF.test(s)&&!BAD.test(s)&&(s.replace(/[^A-Za-z]/g,'').length>4)&&(s.replace(/[^a-z]/g,'').length<=s.replace(/[^A-Z]/g,'').length));if(c)name=clean(c)}
+  if(name)o.name=name;
+  const alab=/^(?:(?:principal\s+place\s+of\s+)?business\s+address|registered\s+(?:office\s+)?address|alamat\s+(?:perniagaan|berdaftar|pejabat\s+berdaftar)|address|alamat)\b\s*[:\-]?\s*(.*)$/i, STOP=/^(?:tel|telephone|phone|fax|email|e-mail|date|tarikh|status|nature|director|pengarah|company|business|registration|no\.|type|jenis|name|nama)\b/i;
+  let ad=[];
+  for(let i=0;i<L.length&&!ad.length;i++){const k=L[i].match(alab);if(k){if(k[1])ad.push(k[1]);for(let j=i+1;j<L.length&&ad.length<4;j++){if(STOP.test(L[j])||alab.test(L[j]))break;ad.push(L[j]);if(/\b\d{5}\b/.test(L[j])&&/[A-Za-z]{3}/.test(L[j].replace(/\d/g,'')))break}}}
+  if(!ad.length){const pi=L.findIndex(s=>/\b\d{5}\b/.test(s)&&/[A-Za-z]{4}/.test(s)&&!/commission|suruhanjaya/i.test(s));if(pi>=0){ad=L.slice(Math.max(0,pi-2),pi+1).filter(s=>!/^(?:tel|fax|email|date|company|name)/i.test(s))}}
+  if(ad.length){o.address=ad.join(', ').replace(/\s*,\s*,+/g,', ').replace(/[,\s]+$/,'').slice(0,250);const st=SSTATE.find(([,rx])=>rx.test(o.address));if(st)o.state=st[0]}
+  const em=T.match(/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i);if(em)o.email=em[0].toLowerCase();
+  const tl=T.match(/(?:tel(?:ephone)?|phone|no\.?\s*tel|telefon)\.?[^\d+\n]{0,12}(\+?\d[\d\s\-]{7,14}\d)/i);if(tl)o.tel=tl[1].replace(/\s+/g,' ').trim();
+  return o;
+}
+const OCRMAP={qf:{name:'qn',ssm:'qr',address:'qa',state:'qst',tel:'qt',email:'qe'},vfile:{name:'vn',ssm:'vr',address:'va',state:'vstate',tel:'vt',email:'ve'}};
+let ocrRun=0;
+async function readSSMFile(inp){
+  const f=inp.files&&inp.files[0], map=OCRMAP[inp.id], st=$('#ocrst'); if(!st)return; const run=++ocrRun;
+  const say=(m,c)=>{if(run===ocrRun){st.textContent=m;st.className='ocrst'+(c?' '+c:'')}}; ocrMsg=say;
+  if(!f){say('');return}
+  if(!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type)||f.size>FS.max){say('');return}
+  let out;
+  try{out=parseSSM(await ssmText(f,say))}
+  catch(e){say('The details could not be read automatically here. Please enter them below.','err');return}
+  if(run!==ocrRun)return;
+  const got=[];
+  [['name','Vendor name'],['ssm','SSM no.'],['address','address'],['state','state'],['tel','telephone'],['email','email']].forEach(([k,lbl])=>{
+    const el=$('#'+map[k]); if(!el||!out[k])return;
+    if(el.value&&!el.dataset.ocr)return;
+    let v=out[k]; if(k==='name'||k==='address')v=wCase(v);
+    if(k==='state'&&![...el.options].some(o=>o.value===v))return;
+    el.value=v; el.dataset.ocr='1'; el.classList.add('ocrf'); got.push(lbl)});
+  say(got.length?'Read from the document: '+got.join(', ')+'. Please check each field before saving.':'No details could be read from this document. Please enter them below.',got.length?'ok':'err');
+}
+document.addEventListener('input',ev=>{const el=ev.target;if(el&&el.dataset&&el.dataset.ocr){delete el.dataset.ocr;el.classList.remove('ocrf')}},true);
 let qvK=null;
 function openQV(k){
   if(!canAddVendor){flash('You do not have access to do this.');return}
   qvK=k; const opt=a=>a.map(o=>`<option value="${E(o)}">${E(o)}</option>`).join('');
   const trades=[...new Set(TRADES.concat(vendors.map(v=>v.trade).filter(Boolean)))];
   $('#qv-b').innerHTML=`<div class="pform">
+   <div class="full"><label class="l" for="qf">SSM company registration document <i>*</i></label><input type="file" id="qf" accept="application/pdf,image/jpeg,image/png"><div class="help">PDF, JPG or PNG, up to ${FS.maxT}. A vendor cannot be added without it. The details are read from the document and filled in below.</div><div class="ocrst" id="ocrst" role="status" aria-live="polite"></div></div>
    <div class="full"><label class="l" for="qn">Vendor name <i>*</i></label><input id="qn" maxlength="120"></div>
    <div><label class="l" for="qr">SSM registration no. <i>*</i></label><input id="qr" maxlength="40"></div>
    <div><label class="l" for="qs">SST no.</label><input id="qs" maxlength="40"></div>
@@ -1418,7 +1492,7 @@ function openQV(k){
    <div><label class="l" for="qc">Person in charge</label><input id="qc" maxlength="80"></div>
    <div><label class="l" for="qt">Telephone</label><input id="qt" maxlength="40"></div>
    <div class="full"><label class="l" for="qe">Email</label><input id="qe" maxlength="100"></div>
-   <div class="full"><label class="l" for="qf">SSM company registration document <i>*</i></label><input type="file" id="qf" accept="application/pdf,image/jpeg,image/png"><div class="help">PDF, JPG or PNG, up to ${FS.maxT}. A vendor cannot be added without it.</div></div></div>`;
+</div>`;
   $('#qv').hidden=false; setTimeout(()=>{const x=$('#qn');x&&x.focus()},30);
 }
 function closeQV(){$('#qv').hidden=true;qvK=null}
@@ -1595,6 +1669,7 @@ function renderVendors(){
   const ro=v?!canVendor:!canAddVendor, dis=ro?' disabled':'';
   const form=!vedit?'':`<div class="panel card" id="vform" style="margin-top:16px"><h3>${v?(canVendor?'Edit vendor':'Vendor details'):'Add vendor'}</h3>
     <div class="pform">
+     ${ro?'':`<div class="full"><label class="l" for="vfile">SSM company registration document ${v?'':'<i>*</i>'}</label><input type="file" id="vfile" accept="application/pdf,image/jpeg,image/png"><div class="help">PDF, JPG or PNG, up to ${FS.maxT}. ${v&&v.ssmdoc?'On file: '+E(v.ssmname||'document')+'. Choose a file only to replace it.':v?'No document on file yet.':'A vendor cannot be added without it. The details are read from the document and filled in below.'}</div><div class="ocrst" id="ocrst" role="status" aria-live="polite"></div></div>`}
      <div class="full"><label class="l" for="vn">Vendor name <i>*</i></label><input id="vn" maxlength="120" value="${E(v?v.name:'')}"${dis}></div>
      <div><label class="l" for="vr">SSM registration no. <i>*</i></label><input id="vr" maxlength="40" value="${E(v?v.ssm||'':'')}"${dis}></div>
      <div><label class="l" for="vs">SST no.</label><input id="vs" maxlength="40" value="${E(v?v.sst||'':'')}"${dis}></div>
@@ -1604,7 +1679,6 @@ function renderVendors(){
      <div><label class="l" for="vc">Contact person</label><input id="vc" maxlength="80" value="${E(v?v.contact||'':'')}"${dis}></div>
      <div><label class="l" for="vt">Telephone</label><input id="vt" maxlength="40" value="${E(v?v.tel||'':'')}"${dis}></div>
      <div><label class="l" for="ve">Email</label><input id="ve" maxlength="100" value="${E(v?v.email||'':'')}"${dis}></div>
-     ${ro?'':`<div class="full"><label class="l" for="vfile">SSM company registration document ${v?'':'<i>*</i>'}</label><input type="file" id="vfile" accept="application/pdf,image/jpeg,image/png"><div class="help">PDF, JPG or PNG, up to ${FS.maxT}. ${v&&v.ssmdoc?'On file: '+E(v.ssmname||'document')+'. Choose a file only to replace it.':v?'No document on file yet.':'A vendor cannot be added without it.'}</div></div>`}
     </div>
     <div class="pbtns">${ro?'':'<button class="btn pri" id="vsave">Save vendor</button>'}<button class="btn" id="vcancel">${ro?'Close':'Cancel'}</button>${v&&canVendor?`<button class="btn" data-dv="${E(v.id)}">Remove vendor</button>`:''}</div>
     ${v?`<div class="blbox"><b>Blacklist</b>${v.bl?`<div>Blacklisted on ${E(dd(v.bldate))}. Reason: ${E(v.blreason||'')}</div>${canVendor?'<div><button class="btn" id="vunbl">Lift blacklist</button></div>':''}`:canVendor?`<div class="help">For a vendor that did not perform. A blacklisted vendor cannot be picked for a new RFQ.</div><input id="blr" maxlength="250" placeholder="Reason, for example work abandoned on PO PRBK/PO: 2026/10/003" aria-label="Reason for blacklisting"><div><button class="btn" id="vbl">Blacklist vendor</button></div>`:'<div>Not blacklisted. Only the vendor management team can blacklist a vendor.</div>'}</div>`:''}
@@ -2224,6 +2298,7 @@ document.addEventListener('input',ev=>{
 document.addEventListener('change',ev=>{
   const el=ev.target;
   if(el.id==='lp-logo'){readLogo(el.files&&el.files[0]);return}
+  if(el.id==='qf'||el.id==='vfile'){readSSMFile(el);return}
   if(el.id==='fs'){fStage=el.value;renderList();return}
   if(el.dataset.vf&&el.dataset.vf!=='q'){vf[el.dataset.vf]=el.value;vtable();return}
   if(el.dataset.k&&draft)handle(el);
