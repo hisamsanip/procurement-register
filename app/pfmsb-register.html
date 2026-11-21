@@ -1697,6 +1697,9 @@ function renderVendors(){
     ${v?`<div class="blbox"><b>Blacklist</b>${v.bl?`<div>Blacklisted on ${E(dd(v.bldate))}. Reason: ${E(v.blreason||'')}</div>${canVendor?'<div><button class="btn" id="vunbl">Lift blacklist</button></div>':''}`:canVendor?`<div class="help">For a vendor that did not perform. A blacklisted vendor cannot be picked for a new RFQ.</div><input id="blr" maxlength="250" placeholder="Reason, for example work abandoned on PO PRBK/PO: 2026/10/003" aria-label="Reason for blacklisting"><div><button class="btn" id="vbl">Blacklist vendor</button></div>`:'<div>Not blacklisted. Only the vendor management team can blacklist a vendor.</div>'}</div>`:''}
    </div>`;
   X.innerHTML=`<h2 class="v">Vendors</h2>
+   <div class="panel card" id="bpctl"><div class="vhead"><h3>SSM document bypass by project</h3></div>
+    <div class="help" style="margin-bottom:8px">When a project is switched on, its Property Managers can register a vendor without the SSM document, with a reason. ${canAdmin?'Only an administrator can change these switches.':'Only an administrator can change these switches. Ask an administrator to switch on your project.'}</div>
+    <div class="tw"><table class="bypt"><thead><tr><th>Project</th><th>Allow SSM bypass</th></tr></thead><tbody>${props.map(q=>`<tr><td>${E(q.code+(q.name?' · '+q.name:''))}</td><td><label class="chk" style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" data-ssmbp="${E(q.code)}"${q.ssmbp?' checked':''}${canAdmin?'':' disabled'}><span>${q.ssmbp?'On':'Off'}</span></label></td></tr>`).join('')||'<tr><td colspan="2">No projects yet.</td></tr>'}</tbody></table></div></div>
    <div class="panel card"><div class="vhead"><h3>Vendor list</h3><button class="btn pri" id="vnew"${canAddVendor?'':' disabled'}>Add vendor</button></div>
     <div class="vfilters">
      <input type="search" data-vf="q" placeholder="Search name, SSM or contact" aria-label="Search vendors" value="${E(vf.q)}">
@@ -2224,6 +2227,13 @@ async function preview(title,filename,blob){
 $('#pv-x').addEventListener('click',closePv);
 $('#pv-dl').addEventListener('click',savePv);
 $('#pv').addEventListener('click',ev=>{if(ev.target.id==='pv')closePv()});
+document.addEventListener('change',async ev=>{const t=ev.target;
+  if(t&&t.dataset&&t.dataset.ssmbp!==undefined){
+    if(!canAdmin){t.checked=!t.checked;flash('Only an administrator can change this.');return}
+    const old=props.find(x=>x.code===t.dataset.ssmbp);if(!old)return; const doc=Object.assign({},old,{ssmbp:!!t.checked});
+    try{await w('properties/'+old.code,doc);props=props.map(x=>x.code===old.code?doc:x);flash('SSM bypass '+(t.checked?'switched on':'switched off')+' for '+old.code);renderVendors()}
+    catch(e){t.checked=!t.checked;flash('Could not save. Try again.')}}
+});
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&!$('#pv').hidden)closePv();if(ev.key==='Escape'&&!$('#qv').hidden)closeQV()});
 async function makePdf(n){
   if(!draft)return; if(dirty()){flash('Save your changes first.');return}
