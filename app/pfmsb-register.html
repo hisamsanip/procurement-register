@@ -1072,7 +1072,7 @@ const FS={max:300*1024,maxT:'300 KB',
 const GATES=[['g1','PRF approval before RFQ','An RFQ cannot be dated before the PRF is approved.'],['g2','RFQ before Quotation Analysis or Direct Sourcing','The QA or Direct Sourcing form cannot be dated before the RFQ is issued.'],['g3','QA or Direct Sourcing approval before PO','A PO cannot be dated before the QA or Direct Sourcing form is approved (PRF approval for a direct purchase or emergency).']];
 const DEF={gates:{g1:true,g2:true,g3:true},bypass:{},direct:3000,quot:100000,minq:3,validity:60,d_direct:14,d_quot:30,d_tender:90,opsN:'Hisam Sanip',opsD:'Assistant General Manager, Operations',ceoN:'Sr. Mohd. Fazli Abd. Majid',ceoD:'Chief Executive Officer',payterm:'30 days from date of invoice'};
 let S=Object.assign({},DEF), props=[], vendors=[], recs=[];
-let pedit='', pLogo=null, db=null, canWrite=true, canAdmin=true, canVendor=true, canAddVendor=true, canProp=true, uid='', sel=null, draft=null, saved='', step=1, view='records', fStage='all', fQ='', newOpen=false;
+let qvBp=false, vBp=false, pedit='', pLogo=null, db=null, canWrite=true, canAdmin=true, canVendor=true, canAddVendor=true, canProp=true, uid='', sel=null, draft=null, saved='', step=1, view='records', fStage='all', fQ='', newOpen=false;
 
 const pad=n=>String(n).padStart(2,'0');
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
@@ -1469,12 +1469,29 @@ async function readSSMFile(inp){
 }
 document.addEventListener('input',ev=>{const el=ev.target;if(el&&el.dataset&&el.dataset.ocr){delete el.dataset.ocr;el.classList.remove('ocrf')}},true);
 let qvK=null;
+const bpOk=code=>{const q=props.find(x=>x.code===code);return !!(q&&q.ssmbp)};
+const bpBox=(pre,codeSel)=>`<div class="full bpbox" id="${pre}bpbox"><button type="button" class="btn sm" id="${pre}bp">Bypass SSM document</button>
+  <span class="help" id="${pre}bph">Your administrator has allowed this vendor to be registered without the SSM document. A reason is required.</span>
+  <div id="${pre}bpf" hidden style="margin-top:8px">${codeSel}<label class="l" for="${pre}bpr">Reason for bypass <i>*</i></label><input id="${pre}bpr" maxlength="160" placeholder="Example: SSM document to follow, urgent repair"><div class="help">The vendor is marked "SSM bypassed" and the reason is recorded. Upload the document later to clear the mark.</div></div></div>`;
+function bpToggle(pre,on){
+  const st=pre==='q'?'qvBp':'vBp'; if(pre==='q')qvBp=on; else vBp=on;
+  const b=$('#'+pre+'bp'),f=$('#'+pre+'bpf'),h=$('#'+pre+'bph'),file=$('#'+(pre==='q'?'qf':'vfile')); if(!b)return;
+  f.hidden=!on; b.textContent=on?'Upload the SSM document instead':'Bypass SSM document'; if(h)h.hidden=on;
+  if(file){file.disabled=on; if(on)file.value=''}
+  if(on){const r=$('#'+pre+'bpr'); r&&r.focus()}
+}
+function bpData(v,pre,code){
+  const reason=$('#'+pre+'bpr').value.trim();
+  if(!reason){flash('Enter the reason for bypassing the SSM document.');return false}
+  if(!bpOk(code)){flash('SSM bypass is not allowed for that project. Ask an administrator.');return false}
+  v.ssmbypass=true; v.bypassprop=code; v.bypassreason=reason; v.bypassby=uid; v.bypassat=Date.now(); return true;
+}
 function openQV(k){
   if(!canAddVendor){flash('You do not have access to do this.');return}
-  qvK=k; const opt=a=>a.map(o=>`<option value="${E(o)}">${E(o)}</option>`).join('');
+  qvK=k; qvBp=false; const opt=a=>a.map(o=>`<option value="${E(o)}">${E(o)}</option>`).join('');
   const trades=[...new Set(TRADES.concat(vendors.map(v=>v.trade).filter(Boolean)))];
   $('#qv-b').innerHTML=`<div class="pform">
-   <div class="full"><label class="l" for="qf">SSM company registration document <i>*</i></label><input type="file" id="qf" accept="application/pdf,image/jpeg,image/png"><div class="help">PDF, JPG or PNG, up to ${FS.maxT}. A vendor cannot be added without it. The details are read from the document and filled in below.</div><div class="ocrst" id="ocrst" role="status" aria-live="polite"></div></div>
+   <div class="full"><label class="l" for="qf">SSM company registration document <i>*</i></label><input type="file" id="qf" accept="application/pdf,image/jpeg,image/png"><div class="help">PDF, JPG or PNG, up to ${FS.maxT}. A vendor cannot be added without it. The details are read from the document and filled in below.</div><div class="ocrst" id="ocrst" role="status" aria-live="polite"></div></div>${draft&&bpOk(draft.prop)?bpBox('q',`<input type="hidden" id="qbpp" value="${E(draft.prop)}">`):''}
    <div class="full"><label class="l" for="qn">Vendor name <i>*</i></label><input id="qn" maxlength="120"></div>
    <div><label class="l" for="qr">SSM registration no. <i>*</i></label><input id="qr" maxlength="40"></div>
    <div><label class="l" for="qs">SST no.</label><input id="qs" maxlength="40"></div>
@@ -1494,19 +1511,21 @@ async function saveQV(){
   if(!v.name||!v.ssm||!v.state||!v.trade){flash('Enter the vendor name, SSM number, state and trade.');return}
   const same=vendors.find(x=>x.name.toLowerCase()===v.name.toLowerCase());
   if(same){flash('A vendor with that name is already in the list. Close this and choose it from the list.');return}
-  const file=$('#qf').files[0];
+  const file=qvBp?null:$('#qf').files[0];
+  if(qvBp){if(!bpData(v,'q',$('#qbpp').value))return}
+  else{
   if(!file){flash('Attach the SSM company registration document.');return}
   if(!/^(application\/pdf|image\/jpeg|image\/png)$/.test(file.type)){flash('Attach a PDF, JPG or PNG file.');return}
-  if(file.size>FS.max){flash('The document is too large. The limit is '+FS.maxT+'.');return}
+  if(file.size>FS.max){flash('The document is too large. The limit is '+FS.maxT+'.');return}}
   const id='v_'+Date.now().toString(36); v.id=id; v.addedBy=uid; v.addedAt=Date.now();
   const b=$('#qv-save'); b.disabled=true;
   try{
-    v.ssmdoc=await FS.put(id,file); v.ssmname=file.name;
+    if(file){v.ssmdoc=await FS.put(id,file); v.ssmname=file.name}
     await w('vendors/'+id,v);
     vendors=vendors.filter(x=>x.id!==id).concat([v]).sort((a,b)=>a.name.localeCompare(b.name));
     const k=qvK; closeQV(); b.disabled=false;
     if(draft&&k){draft[k]=v.name; fillVendors(); update()}
-    flash('Vendor added and selected');
+    flash(v.ssmbypass?'Vendor added with SSM bypass':'Vendor added and selected');
   }catch(e){b.disabled=false;flash('Could not save the vendor ('+(e&&(e.code||e.statusCode)||'error')+').')}
 }
 function fillSelv(){
@@ -1624,6 +1643,7 @@ function renderSetup(){
      <div class="full"><label class="l" for="lp-lic">License No</label><input id="lp-lic" maxlength="60" placeholder="Property Manager licence or registration number"></div>
      <div><label class="l" for="lp-be">Building Executive</label><input id="lp-be" maxlength="80"></div>
      <div><label class="l" for="lp-rpm">Registered Property Manager</label><input id="lp-rpm" maxlength="80"></div>
+     <div class="full"><label class="chk" style="display:flex;gap:10px;align-items:flex-start"><input type="checkbox" id="lp-bp" style="margin-top:3px"><span><b>Allow SSM document bypass for this project</b><br><span class="help">When on, a Property Manager of this project sees a Bypass SSM document button when adding a vendor and can register the vendor without the document, giving a reason. Only an administrator can change this.</span></span></label></div>
      <div class="full"><label class="l" for="lp-logo">Logo (optional)</label><input type="file" id="lp-logo" accept="image/png,image/jpeg,image/webp"><div class="help">Without your own logo, the letterhead uses the standard PFMSB logo. The property code prints under the logo. <button class="btn sm" data-logoclr="1" type="button">Remove logo</button></div></div>
     </div>
     <label class="l">Letterhead preview</label>
@@ -1652,16 +1672,17 @@ function vtable(){
     if(vf.val==='0'&&s.val>0||vf.val==='a'&&!(s.val>0&&s.val<=S.direct)||vf.val==='b'&&!(s.val>S.direct&&s.val<=S.quot)||vf.val==='c'&&!(s.val>S.quot))return false;
     const n=s.cur.size; if(vf.cur==='0'&&n!==0||vf.cur==='1'&&!(n>=1&&n<=2)||vf.cur==='3'&&n<3)return false;
     return true});
-  box.innerHTML=`<div class="help" style="margin-bottom:8px">${rows.length} of ${vendors.length} vendors</div><div class="tw"><table><thead><tr><th>Vendor</th><th>State</th><th>Trade</th><th>Projects</th><th class="n">Contract value (RM)</th><th class="n">Current projects</th><th>Status</th><th></th></tr></thead><tbody>${rows.map(({v,s})=>`<tr class="${vedit===v.id?'sel':''}"><td class="wrap">${E(v.name)}<small>SSM ${E(v.ssm||'not recorded')}</small></td><td>${E(v.state||'–')}</td><td>${E(v.trade||'–')}</td><td>${E([...s.props].sort().join(', ')||'–')}</td><td class="n">${RM(s.val)}</td><td class="n">${s.cur.size}</td><td><span class="pill ${v.bl?'bad':'ok'}">${v.bl?'Blacklisted':'Active'}</span></td><td class="n">${v.ssmdoc?`<button class="btn sm" data-vdoc="${E(v.id)}">SSM document</button> `:''}<button class="btn sm" data-ve="${E(v.id)}">${canVendor?'Edit':'View'}</button></td></tr>`).join('')||'<tr><td class="empty" colspan="8">No vendors match.</td></tr>'}</tbody></table></div>`;
+  box.innerHTML=`<div class="help" style="margin-bottom:8px">${rows.length} of ${vendors.length} vendors</div><div class="tw"><table><thead><tr><th>Vendor</th><th>State</th><th>Trade</th><th>Projects</th><th class="n">Contract value (RM)</th><th class="n">Current projects</th><th>Status</th><th></th></tr></thead><tbody>${rows.map(({v,s})=>`<tr class="${vedit===v.id?'sel':''}"><td class="wrap">${E(v.name)}<small>SSM ${E(v.ssm||'not recorded')}</small>${v.ssmbypass?`<small><span class="pill warn">SSM bypassed</span> ${E(v.bypassprop||'')}${v.bypassreason?' · '+E(v.bypassreason):''}</small>`:''}</td><td>${E(v.state||'–')}</td><td>${E(v.trade||'–')}</td><td>${E([...s.props].sort().join(', ')||'–')}</td><td class="n">${RM(s.val)}</td><td class="n">${s.cur.size}</td><td><span class="pill ${v.bl?'bad':'ok'}">${v.bl?'Blacklisted':'Active'}</span></td><td class="n">${v.ssmdoc?`<button class="btn sm" data-vdoc="${E(v.id)}">SSM document</button> `:''}<button class="btn sm" data-ve="${E(v.id)}">${canVendor?'Edit':'View'}</button></td></tr>`).join('')||'<tr><td class="empty" colspan="8">No vendors match.</td></tr>'}</tbody></table></div>`;
 }
 function renderVendors(){
   const X=$('#v-vendors'); const opt=(a,cur)=>a.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${E(v)}"${v===cur?' selected':''}>${E(l)}</option>`}).join('');
   const trades=[...new Set(TRADES.concat(vendors.map(v=>v.trade).filter(Boolean)))];
   const v=vedit&&vedit!=='new'?vendors.find(x=>x.id===vedit):null; if(vedit&&vedit!=='new'&&!v)vedit=null;
-  const ro=v?!canVendor:!canAddVendor, dis=ro?' disabled':'';
+  const ro=v?!canVendor:!canAddVendor, dis=ro?' disabled':''; vBp=false; const bpl=props.filter(q=>q.ssmbp);
   const form=!vedit?'':`<div class="panel card" id="vform" style="margin-top:16px"><h3>${v?(canVendor?'Edit vendor':'Vendor details'):'Add vendor'}</h3>
     <div class="pform">
      ${ro?'':`<div class="full"><label class="l" for="vfile">SSM company registration document ${v?'':'<i>*</i>'}</label><input type="file" id="vfile" accept="application/pdf,image/jpeg,image/png"><div class="help">PDF, JPG or PNG, up to ${FS.maxT}. ${v&&v.ssmdoc?'On file: '+E(v.ssmname||'document')+'. Choose a file only to replace it.':v?'No document on file yet.':'A vendor cannot be added without it. The details are read from the document and filled in below.'}</div><div class="ocrst" id="ocrst" role="status" aria-live="polite"></div></div>`}
+     ${(!ro&&!v&&bpl.length)?bpBox('v',`<label class="l" for="vbpp">Project <i>*</i></label><select id="vbpp"><option value="">Select…</option>${bpl.map(q=>`<option value="${E(q.code)}">${E(q.code+(q.name?' · '+q.name:''))}</option>`).join('')}</select>`):''}
      <div class="full"><label class="l" for="vn">Vendor name <i>*</i></label><input id="vn" maxlength="120" value="${E(v?v.name:'')}"${dis}></div>
      <div><label class="l" for="vr">SSM registration no. <i>*</i></label><input id="vr" maxlength="40" value="${E(v?v.ssm||'':'')}"${dis}></div>
      <div><label class="l" for="vs">SST no.</label><input id="vs" maxlength="40" value="${E(v?v.sst||'':'')}"${dis}></div>
@@ -1699,14 +1720,15 @@ async function saveVendor(){
   if(!v.name||!v.ssm||!v.state||!v.trade){flash('Enter the vendor name, SSM number, state and trade.');return}
   if(vendors.some(x=>x.id!==(old&&old.id)&&x.name.toLowerCase()===v.name.toLowerCase())){flash('A vendor with that name already exists.');return}
   if(old&&old.name!==v.name&&recs.some(r=>[r.v1,r.v2,r.v3,r.selv].includes(old.name))){flash('This vendor is used in a record, so the name cannot change.');return}
-  const file=$('#vfile').files[0];
-  if(!old&&!file){flash('Attach the SSM company registration document.');return}
+  const file=vBp?null:$('#vfile').files[0];
+  if(vBp){if(!$('#vbpp').value){flash('Select the project for the SSM bypass.');return}if(!bpData(v,'v',$('#vbpp').value))return}
+  else if(!old&&!file){flash('Attach the SSM company registration document.');return}
   if(file&&!/^(application\/pdf|image\/jpeg|image\/png)$/.test(file.type)){flash('Attach a PDF, JPG or PNG file.');return}
   if(file&&file.size>FS.max){flash('The document is too large. The limit is '+FS.maxT+'.');return}
   const id=old?old.id:'v_'+Date.now().toString(36); v.id=id; if(!old){v.addedBy=uid;v.addedAt=Date.now()}
   const b=$('#vsave'); b.disabled=true;
   try{
-    if(file){v.ssmdoc=await FS.put(id,file);v.ssmname=file.name}
+    if(file){v.ssmdoc=await FS.put(id,file);v.ssmname=file.name;['ssmbypass','bypassprop','bypassreason','bypassby','bypassat'].forEach(k=>delete v[k])}
     await w('vendors/'+id,v);
     vendors=vendors.filter(x=>x.id!==id).concat([v]).sort((a,b)=>a.name.localeCompare(b.name));
     vedit=null; flash('Vendor saved'); renderVendors();
@@ -1725,12 +1747,12 @@ async function setBl(on){
 const PF=[['code','lp-code'],['name','lp-name'],['address','lp-addr'],['tel','lp-tel'],['email','lp-mail'],['pmco','lp-pm'],['licno','lp-lic'],['be','lp-be'],['rpm','lp-rpm']];
 function loadProp(){
   const p=props.find(x=>x.code===pedit)||{}; pLogo=p.logo?{data:p.logo,w:p.logoW,h:p.logoH}:null;
-  PF.forEach(([k,id])=>{const el=$('#'+id);if(el)el.value=p[k]||''});
+  PF.forEach(([k,id])=>{const el=$('#'+id);if(el)el.value=p[k]||''}); {const bp=$('#lp-bp');if(bp){bp.checked=!!p.ssmbp;bp.disabled=!canAdmin}}
   if(!canProp)$$('#v-setup input,#v-setup textarea,#v-setup select').forEach(x=>x.disabled=true);
   if(!canAdmin)$$('[data-s],[data-st],[data-gate],[data-byp]').forEach(x=>x.disabled=true);
   lhPreview();
 }
-function curProp(){const o={};PF.forEach(([k,id])=>{const el=$('#'+id);o[k]=el?el.value.trim():''});o.code=(o.code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(pLogo){o.logo=pLogo.data;o.logoW=pLogo.w;o.logoH=pLogo.h}return o}
+function curProp(){const o={};PF.forEach(([k,id])=>{const el=$('#'+id);o[k]=el?el.value.trim():''});o.code=(o.code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');{const bp=$('#lp-bp');if(bp)o.ssmbp=!!bp.checked}if(pLogo){o.logo=pLogo.data;o.logoW=pLogo.w;o.logoH=pLogo.h}return o}
 function lhPreview(){
   const box=$('#lhp'); if(!box)return; const p=curProp();
   box.innerHTML=`<div class="top"><div class="lg"><img src="${E(p.logo||STDLOGO)}" alt=""><span>${E(p.code||'CODE')}</span></div><div class="tx"><div class="tt">${E((p.name||'Project name').toUpperCase())}</div><div class="ad">${E(p.address||'Management office address')}</div><div class="ct"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="#191919" aria-hidden="true"><rect x="2" y="2" width="20" height="5" rx="2"/><rect x="4" y="8" width="16" height="14" rx="2"/><circle cx="12" cy="15" r="3.4" fill="#fff"/></svg>: ${E(p.tel||'-')}</span><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="2" aria-hidden="true"><rect x="2" y="5" width="20" height="14"/><path d="M2 5l10 8 10-8"/></svg>: ${E(p.email||'-')}</span></div><div class="rl"></div><div class="pm">Managed by:<b>${E(p.pmco||'Property management company')}</b>${p.licno?`<small>License No: ${E(p.licno)}</small>`:''}</div></div></div>`;
@@ -1749,7 +1771,7 @@ async function saveProp(){
   if(!p.code){flash('Enter a property code.');return}
   if(!p.name||!p.address||!p.pmco){flash('Enter the project name, address and property management company.');return}
   if(!pedit&&props.some(x=>x.code===p.code)){flash('The property code '+p.code+' is already used. Enter a different code.');return}
-  const old=props.find(x=>x.code===p.code)||{}; const doc=Object.assign({},old,p); if(!pLogo){delete doc.logo;delete doc.logoW;delete doc.logoH}
+  const old=props.find(x=>x.code===p.code)||{}; if(!canAdmin)p.ssmbp=!!old.ssmbp; const doc=Object.assign({},old,p); if(!pLogo){delete doc.logo;delete doc.logoW;delete doc.logoH}
   try{await w('properties/'+p.code,doc);if(!db){props=props.filter(x=>x.code!==p.code).concat([doc]).sort((a,b)=>a.code.localeCompare(b.code))}pedit=p.code;flash('Property saved');renderSetup()}
   catch(e){const c=e&&e.code; flash(c==='23505'||c==='42501'&&!pedit?'The property code '+p.code+' is already used. Enter a different code.':'Could not save ('+(c||'error')+'). If a logo is large, remove it and try again.')}
 }
@@ -2254,6 +2276,8 @@ document.addEventListener('click',async ev=>{
   if(t.dataset.qv){openQV(t.dataset.qv);return}
   if(t.id==='qv-x'){closeQV();return}
   if(t.id==='qv-save')return saveQV();
+  if(t.id==='qbp'){bpToggle('q',!qvBp);return}
+  if(t.id==='vbp'){bpToggle('v',!vBp);return}
   if(t.id==='vnew'){vedit='new';renderVendors();$('#vform').scrollIntoView({block:'start'});return}
   if(t.dataset.ve){vedit=t.dataset.ve;renderVendors();$('#vform').scrollIntoView({block:'start'});return}
   if(t.id==='vcancel'){vedit=null;renderVendors();return}
